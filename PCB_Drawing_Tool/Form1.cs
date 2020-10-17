@@ -23,69 +23,50 @@ namespace PCB_Drawing_Tool
         {
             lineManager = new LineManager();
             mouseDownTracker = new System.Windows.Forms.Timer();
-            mouseDownTracker.Interval = 500;
+            mouseDownTracker.Interval = 1;
             mouseDownTracker.Tick += new EventHandler(CreatePreviewLine);
 
             InitializeComponent();
         }
 
-        private void PaintGraphics(object sender, System.Windows.Forms.PaintEventArgs args)
+        private void PaintGraphics(object sender, PaintEventArgs args)
         {
             int numberOfLines = lineManager.GetLineCount();
             for (int i = 1; i <= numberOfLines; i++)
             {
                 Console.WriteLine(i);
                 List<int> info = lineManager.GetLineDetails(i);
-                DrawLine(info[0], info[1], info[2], info[3], info[4]);
+                DrawLine(info[0], info[1], info[2], info[3]);
             }
         }
 
-        private void DrawLine(int x1, int y1, int x2, int y2, int penThickness)
+        private void DrawLine(int x1, int y1, int lineLength, int lineWidth)
         {
-            int lineWidth = Math.Abs(x2-x1);
-            int lineHeight = Math.Abs(y2-y1);
-            int containerWidth = lineWidth + penThickness + 7;
-            int containerHeight = lineHeight + penThickness + 7;
+            lineManager.AddLine(x1, y1, lineLength, lineWidth);
             int picBoxNum = lineManager.GetLineCount();
 
-            PictureBox picBox = new PictureBox { 
-                Location = new Point(x2, y2), 
-                Name = "lineBox"+picBoxNum, 
-                Size = new Size(containerWidth, containerHeight), 
-                BackColor = Color.Transparent 
+            PictureBox lineBox = new PictureBox
+            {
+                Name = "lineBox" + picBoxNum,
+                Location = new Point(x1, y1),
+                BackColor = Color.Black,
+                Width = lineLength,
+                Height = lineWidth
             };
 
-            Bitmap bitmap = new Bitmap(containerWidth, containerHeight);
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                using (Pen pen = new Pen(Color.Black, penThickness))
-                {
-                    int margin = Convert.ToInt16(penThickness / 1.4);
-                    int startPosX = 0; 
-                    int startPosY = 0;
-                    int endPosX = x2;
-                    int endPosY = y2;
-                    /*if (x2-x1 < 0 ^ y2-y1 < 0)
-                    {
-                        startPosX = 0;
-                        startPosY = lineHeight;
-                        endPosX = lineWidth;
-                        endPosY = 0;
-                    } */
-                    g.DrawLine(pen, startPosX+margin, startPosY+margin, endPosX+margin, endPosY+margin);
-                }
-            }
+            GraphicsPath gp = new GraphicsPath();
+            gp.AddRectangle(new Rectangle(0, 0, lineLength, lineWidth));
+            Region rg = new Region(gp);
+            lineBox.Region = rg;
+            mainDrawBox.Controls.Add(lineBox);
 
-            picBox.Image = bitmap;
-            picBox.BringToFront();
-
-            mainDrawBox.Controls.Add(picBox);
+            CreateLineLabel(x1, y1);
         }
 
-        private void CreateLineLabel(int x1, int y1, int x2, int y2, int penThickness)
+        private void CreateLineLabel(int x1, int y1)
         {
-            int lineID = this.lineManager.AddLine(x1, y1, x2, y2, penThickness);
-            Point location = new Point(15 + x1 + (x2 - x1) / 2, -15 + y1 + (y2 - y1) / 2);
+            int lineID = this.lineManager.GetLineCount();
+            Point location = new Point(x1, y1);
             Label currentLabel = new Label { 
                 Name = "lblID"+lineID, 
                 Location = location, 
@@ -109,8 +90,8 @@ namespace PCB_Drawing_Tool
                 int y2 = Int16.Parse(txtY2.Text);
                 int penThickness = Int16.Parse(cboLinewidth.Text);
 
-                CreateLineLabel(x1, y1, x2, y2, penThickness);
-                DrawLine(x1, y1, x2, y2, penThickness);
+                CreateLineLabel(x1, y1);
+                DrawLine(x1, y1, x2, y2);
             } catch (Exception error)
             {
                 CreateErrorMsgBox(error);
@@ -146,7 +127,7 @@ namespace PCB_Drawing_Tool
                 Height = 15
             };
 
-            System.Drawing.Drawing2D.GraphicsPath gp = new System.Drawing.Drawing2D.GraphicsPath();
+            GraphicsPath gp = new GraphicsPath();
             gp.AddEllipse(0, 0, startDotNewLine.Width - 3, startDotNewLine.Height - 3);
             Region rg = new Region(gp);
             startDotNewLine.Region = rg;
@@ -162,30 +143,58 @@ namespace PCB_Drawing_Tool
 
             Point cursorLocation = GetCursorPosition();
             int penThickness = Int16.Parse(cboLinewidth.Text);
-            int linelength = cursorLocation.Y - startDotNewLine.Location.Y;
+            int x1 = startDotNewLine.Location.X;
+            int y1 = startDotNewLine.Location.Y;
+            int lineLength = 0;
+            int lineWidth = penThickness;
+            //int lineAngle = 0;
+            int lineOffset = 40;
+
+            // Left-line
+            if ((cursorLocation.X - x1) > lineOffset && (cursorLocation.Y - y1) > -lineOffset)
+            {
+                lineLength = Math.Abs(cursorLocation.X - x1);
+            }
+
+            // Up-line
+            if ((cursorLocation.X - x1) > -lineOffset && (cursorLocation.Y - y1) < -lineOffset)
+            {
+                lineLength = penThickness; 
+                lineWidth = Math.Abs(cursorLocation.Y - y1) + 12;
+                y1 += (cursorLocation.Y - y1);
+            }
+
+            // Right-line
+            if ((cursorLocation.X - x1) < -lineOffset && (cursorLocation.Y - y1) < lineOffset)
+            {
+                lineLength = Math.Abs(cursorLocation.X - x1) + 12;
+                x1 += (cursorLocation.X - x1);
+            }
+
+            // Down-line
+            if ((cursorLocation.X - x1) < lineOffset && (cursorLocation.Y - y1) > lineOffset)
+            {
+                lineLength = penThickness;
+                lineWidth = Math.Abs(cursorLocation.Y - y1);
+            }
+
 
             previewLine = new PictureBox
             {
-                Location = new Point(startDotNewLine.Location.X, startDotNewLine.Location.Y),
+                Location = new Point(x1, y1),
                 BackColor = Color.Black,
-                Width = linelength,
-                Height = penThickness
+                Width = lineLength,
+                Height = lineWidth
             };
 
             GraphicsPath gp = new GraphicsPath();
-            
-
-            
- 
-            gp.AddRectangle(new Rectangle(0, 0, linelength, penThickness));
-            //gp.AddRectangle(new Rectangle(0, 0, 300, 10));
+            gp.AddRectangle(new Rectangle(0, 0, lineLength, lineWidth));
             //Matrix matrix = new Matrix();
-            //matrix.RotateAt(90, new Point(0, 0));
+            //matrix.RotateAt(lineAngle, new Point(0, 0));
             //gp.Transform(matrix);
             Region rg = new Region(gp);
             previewLine.Region = rg;
             mainDrawBox.Controls.Add(previewLine);
-   
         }
 
         private void mainDrawBox_MouseDown(object sender, MouseEventArgs e)
@@ -203,6 +212,7 @@ namespace PCB_Drawing_Tool
             if (e.Button == MouseButtons.Left)
             {
                 mouseDownTracker.Stop();
+                DrawLine(previewLine.Location.X, previewLine.Location.Y, previewLine.Width, previewLine.Height);
             }
         }
     }

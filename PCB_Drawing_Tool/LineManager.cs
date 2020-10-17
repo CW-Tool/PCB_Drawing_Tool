@@ -25,11 +25,10 @@ namespace PCB_Drawing_Tool
 			this.allLines = new Dictionary<int, List<int>>();
 		}
 		
-		public int AddLine(int x1, int y1, int x2, int y2, int linewidth)
+		public void AddLine(int x1, int y1, int lineLength, int lineWidth)
         {
 			int lineID = allLines.Count + 1;
-			allLines.Add(lineID, new List<int>() {x1, y1, x2, y2, linewidth});
-			return lineID;
+			allLines.Add(lineID, new List<int>() {x1, y1, lineLength, lineWidth});
         }
 
 	}
