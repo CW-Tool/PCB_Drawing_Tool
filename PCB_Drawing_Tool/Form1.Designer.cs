@@ -128,6 +128,8 @@
             this.mainDrawBox.Size = new System.Drawing.Size(799, 621);
             this.mainDrawBox.TabIndex = 7;
             this.mainDrawBox.TabStop = false;
+            this.mainDrawBox.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseDown);
+            this.mainDrawBox.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseUp);
             // 
             // panel1
             // 
@@ -184,7 +186,6 @@
             this.Controls.Add(this.mainDrawBox);
             this.Name = "Form1";
             this.Text = "Form1";
-            this.Paint += new System.Windows.Forms.PaintEventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.mainDrawBox)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
