@@ -28,15 +28,16 @@ namespace PCB_Drawing_Tool
             mouseDownTracker.Interval = 1;
             mouseDownTracker.Tick += new EventHandler(CreatePreviewLine);
             this.WindowState = FormWindowState.Maximized;
+            mainDrawBox.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
         }
 
         private void ResizeCompontensToForm(object sender, EventArgs e)
         {
             Control window = sender as Control;
-            mainDrawBox.Size = new Size(window.Width - 150, window.Height);
-            mainDrawBox.Location = new Point(0, 0);
-            panel1.Size = new Size(115, window.Height - 60);
-            panel1.Location = new Point(window.Width - 140, 10);
+            mainContainer.Size = new Size(window.Width - 150, window.Height - 50);
+            mainContainer.Location = new Point(0, 0);
+            sidebarContainer.Size = new Size(115, window.Height - 60);
+            sidebarContainer.Location = new Point(window.Width - 140, 10);
         }
 
         private void DrawLine(int x1, int y1, int lineLength, int lineWidth)
@@ -56,9 +57,6 @@ namespace PCB_Drawing_Tool
             mainDrawBox.Controls.Add(lineBox);
 
             lineBox.Click += new EventHandler(this.SelectLine);
-
-            //Console.WriteLine(lineLength + " " + lineWidth);
-            //CreateLineLabel(lineLength, lineWidth);
         }
 
         private void SelectLine(object sender, EventArgs e)
@@ -68,32 +66,6 @@ namespace PCB_Drawing_Tool
 
         }
 
-        /*
-        private void CreateLineLabel(int x1, int y1)
-        {
-            int lineID = this.lineManager.GetLineCount();
-            Point location = new Point(startDotNewLine.Location.X + (x1 / 2), startDotNewLine.Location.Y + (y1 / 2));
-
-            Label currentLabel = new Label
-            {
-                Name = "lblID" + lineID,
-                Location = location,
-                Text = "ID" + lineID,
-                BackColor = Color.Transparent,
-                Width = 28,
-                Height = 13
-            };
-
-            mainDrawBox.Controls.Add(currentLabel);
-        }
-        */
-
-        /*
-        private void CreateErrorMsgBox(Exception error)
-        {
-            MessageBox.Show("Something went wrong: " + error);
-        }
-        */
         private Point GetCursorPosition()
         {
             return this.PointToClient(Cursor.Position);
@@ -119,6 +91,11 @@ namespace PCB_Drawing_Tool
                     DrawLine(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize);
                     lineManager.UpdateLine(i, info[0], info[1], info[2] + zoomSize, info[3] + zoomSize);
                 }
+
+                for (int i = 0; i < cboLinewidth.Items.Count; i++)
+                {
+                    cboLinewidth.Items[i] = (Convert.ToInt32(cboLinewidth.Items[i]) + zoomSize).ToString();
+                } 
             }   
             else
             {
@@ -254,6 +231,14 @@ namespace PCB_Drawing_Tool
         private void btnZoomIn_Click(object sender, EventArgs e)
         {
             ZoomInOut(false);
+        }
+
+        private void Form1_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Control && e.KeyCode == Keys.Z)
+            {
+                Console.WriteLine("Test");
+            }
         }
     }
 }
