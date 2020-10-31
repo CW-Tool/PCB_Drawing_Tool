@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Reflection;
 
 namespace PCB_Drawing_Tool
 {
@@ -41,7 +42,7 @@ namespace PCB_Drawing_Tool
         }
 
         // This overloaded method creates a line.
-        private PictureBox DrawObject(int x1, int y1, int lineLength, int lineWidth)
+        private PictureBox DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
         {
             PictureBox graphicObject = new PictureBox
             {
@@ -53,6 +54,9 @@ namespace PCB_Drawing_Tool
 
             GraphicsPath gp = new GraphicsPath();
             gp.AddRectangle(new Rectangle(0, 0, lineLength, lineWidth));
+            Matrix matrix = new Matrix();
+            matrix.RotateAt(lineAngle, new Point(lineLength / 2, lineWidth / 2));
+            gp.Transform(matrix);
             Region rg = new Region(gp);
             graphicObject.Region = rg;
             mainDrawCanvas.Controls.Add(graphicObject);
@@ -62,18 +66,23 @@ namespace PCB_Drawing_Tool
         }
 
         // This overloaded method creates a circle (filled/empty)
-        private PictureBox DrawObject(int x1, int y1, int diameter, bool filled)
+        private PictureBox DrawObject(int x1, int y1, int diameter, int y2, bool filled)
         {
             PictureBox graphicObject = new PictureBox
             {
                 Location = new Point(x1, y1),
                 BackColor = Color.Black,
                 Width = diameter,
-                Height = diameter
+                Height = 500
             };
 
+            if (filled == true)
+            {
+
+            }
+
             GraphicsPath gp = new GraphicsPath();
-            gp.AddEllipse(0, 0, diameter, diameter);
+            gp.AddEllipse(0, 0, 300, 300);
             Region rg = new Region(gp);
             graphicObject.Region = rg;
             mainDrawCanvas.Controls.Add(graphicObject);
@@ -86,7 +95,6 @@ namespace PCB_Drawing_Tool
         {
             PictureBox clickedLine = sender as PictureBox;
             clickedLine.BackColor = Color.Red;
-
         }
 
         private Point GetCursorPosition()
@@ -110,7 +118,7 @@ namespace PCB_Drawing_Tool
                 for (int i = 1; i <= numberOfLines; i++)
                 {
                     List<int> info = canvasManager.GetObjectDetails(i);
-                    canvasManager.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize));
+                    canvasManager.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
@@ -170,17 +178,20 @@ namespace PCB_Drawing_Tool
             int lineOffset = 30;
 
             // East-line
-            if ((cursorLocation.X - x1) > 250 && (cursorLocation.Y - y1) > -lineOffset)
+            if ((cursorLocation.X - x1) > lineOffset && (cursorLocation.Y - y1) > -lineOffset)
             {
                 lineLength = Math.Abs(cursorLocation.X - x1);
             }
 
+
+            Console.WriteLine(cursorLocation.X - x1);
+            Console.WriteLine(cursorLocation.Y - y1);
             // South/East-diagonal
-            if ((cursorLocation.X - x1) > 30 && (cursorLocation.X - x1) < 250 && (cursorLocation.Y - y1) > 0)
+            if ((cursorLocation.X - x1) > lineOffset && (cursorLocation.Y - y1) > lineOffset)
             {
-                lineAngle = 45;
+                lineAngle = -45;
                 lineLength = Math.Abs(cursorLocation.X - x1);
-                lineWidth += 100;
+                lineWidth = Math.Abs(cursorLocation.Y - y1);
             }
 
             // North-line
@@ -210,13 +221,15 @@ namespace PCB_Drawing_Tool
                 Location = new Point(x1, y1),
                 BackColor = Color.Black,
                 Width = lineLength,
-                Height = lineWidth
+                Height = lineWidth,
+                Name = lineAngle.ToString()
             };
+
 
             GraphicsPath gp = new GraphicsPath();
             gp.AddRectangle(new Rectangle(0, 0, lineLength, lineWidth));
             Matrix matrix = new Matrix();
-            matrix.RotateAt(lineAngle, new Point(x1, y1));
+            matrix.RotateAt(lineAngle, new Point(lineLength/2, lineWidth/2));
             gp.Transform(matrix);
             Region rg = new Region(gp);
             previewLine.Region = rg;
@@ -233,12 +246,14 @@ namespace PCB_Drawing_Tool
                     parameters.Add(previewLine.Location.Y);
                     parameters.Add(previewLine.Width);
                     parameters.Add(previewLine.Height);
+                    parameters.Add(Convert.ToInt32(previewLine.Name));
                     break;
                 case "Circle (empty)":
                 case "Circle (filled)":
                     parameters.Add(previewLine.Location.X);
                     parameters.Add(previewLine.Location.Y);
-                    parameters.Add(Convert.ToInt32(cboLinewidth.Text));
+                    parameters.Add(previewLine.Width);
+                    parameters.Add(previewLine.Height);
                     break;
             }
             return parameters;
@@ -263,11 +278,14 @@ namespace PCB_Drawing_Tool
                 switch (parameters.Count)
                 {
                     case 3:
-                        bool filled = cboObjectType.Text == "Circle (empty)" ? false : true;
-                        canvasManager.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], filled));
+                        
                         break;
                     case 4:
-                        canvasManager.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3]));
+                        bool filled = cboObjectType.Text == "Circle (empty)" ? false : true;
+                        canvasManager.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], filled));
+                        break;
+                    case 5:
+                        canvasManager.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]));
                         break;
                 }
                 

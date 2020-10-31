@@ -48,7 +48,7 @@ namespace PCB_Drawing_Tool
 		public List<int> GetObjectDetails(int objectID)
 		{
 			PictureBox picObject = allCanvasObjects[objectID]; 
-			return new List<int>(){ picObject.Location.X, picObject.Location.Y, picObject.Width, picObject.Height };
+			return new List<int>(){ picObject.Location.X, picObject.Location.Y, picObject.Width, picObject.Height, Convert.ToInt32(picObject.Name) };
 		}
 
 		public PictureBox RemoveLastObjectFromCanvas()
