@@ -15,7 +15,6 @@ namespace PCB_Drawing_Tool
 {
     public partial class Form1 : Form
     {
-        private CanvasManager canvasManager;
         private System.Windows.Forms.Timer mouseDownTracker;
         private PictureBox startDotNewLine;
         private PictureBox previewLine;
@@ -24,7 +23,6 @@ namespace PCB_Drawing_Tool
         {
             InitializeComponent();
 
-            canvasManager = new CanvasManager();
             mouseDownTracker = new System.Windows.Forms.Timer();
             mouseDownTracker.Interval = 1;
             mouseDownTracker.Tick += new EventHandler(CreatePreviewLine);
@@ -41,8 +39,13 @@ namespace PCB_Drawing_Tool
             sidebarContainer.Location = new Point(window.Width - 140, 10);
         }
 
+        private void DrawAllObjects(List<PictureBox> objectsToDraw)
+        {
+            
+        }
+
         // This overloaded method creates a line.
-        private PictureBox DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
+        public PictureBox DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
         {
             PictureBox graphicObject = new PictureBox
             {
@@ -111,14 +114,14 @@ namespace PCB_Drawing_Tool
                 zoomSize *= -1;
             }
 
-            if (canvasManager.GetSmallestObjectAspect() + zoomSize > 0)
+            if (CanvasManager.Singleton.GetSmallestObjectAspect() + zoomSize > 0)
             {
                 mainDrawCanvas.Controls.Clear();
-                int numberOfLines = canvasManager.GetCountOfCanvasObjects();
+                int numberOfLines = CanvasManager.Singleton.GetCountOfCanvasObjects();
                 for (int i = 1; i <= numberOfLines; i++)
                 {
-                    List<int> info = canvasManager.GetObjectDetails(i);
-                    canvasManager.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
+                    List<int> info = CanvasManager.Singleton.GetObjectDetails(i);
+                    CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
@@ -282,10 +285,10 @@ namespace PCB_Drawing_Tool
                         break;
                     case 4:
                         bool filled = cboObjectType.Text == "Circle (empty)" ? false : true;
-                        canvasManager.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], filled));
+                        CanvasManager.Singleton.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], filled));
                         break;
                     case 5:
-                        canvasManager.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]));
+                        CanvasManager.Singleton.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]));
                         break;
                 }
                 
@@ -309,19 +312,19 @@ namespace PCB_Drawing_Tool
         {
             if (e.Control && e.KeyCode == Keys.Z)
             {
-                ClearMainDrawCanvas(canvasManager.RemoveLastObjectFromCanvas());
+                ClearMainDrawCanvas(CanvasManager.Singleton.RemoveLastObjectFromCanvas());
             }
         }
 
         private void btnUndo_Click(object sender, EventArgs e)
         {
-            ClearMainDrawCanvas(canvasManager.RemoveLastObjectFromCanvas());
+            ClearMainDrawCanvas(CanvasManager.Singleton.RemoveLastObjectFromCanvas());
             UpdateUndoButtonStatus();
         }
 
         private void UpdateUndoButtonStatus()
         {
-            if (canvasManager.GetCountOfCanvasObjects() > 0)
+            if (CanvasManager.Singleton.GetCountOfCanvasObjects() > 0)
             {
                 btnUndo.Enabled = true;
             }
@@ -330,6 +333,11 @@ namespace PCB_Drawing_Tool
                 btnUndo.Enabled = false;
             }
             Console.WriteLine(btnUndo.Enabled);
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            FileManager.Singleton.SaveToFile(CanvasManager.Singleton.GetAllObjects());
         }
     }
 }

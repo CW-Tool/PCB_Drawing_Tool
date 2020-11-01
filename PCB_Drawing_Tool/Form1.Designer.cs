@@ -47,8 +47,7 @@
             // mainDrawCanvas
             // 
             this.mainDrawCanvas.BackColor = System.Drawing.Color.Transparent;
-            this.mainDrawCanvas.Location = new System.Drawing.Point(7, 9);
-            this.mainDrawCanvas.Margin = new System.Windows.Forms.Padding(4);
+            this.mainDrawCanvas.Location = new System.Drawing.Point(5, 7);
             this.mainDrawCanvas.Name = "mainDrawCanvas";
             this.mainDrawCanvas.Size = new System.Drawing.Size(100, 100);
             this.mainDrawCanvas.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
@@ -68,29 +67,27 @@
             this.sidebarContainer.Controls.Add(this.btnZoomOut);
             this.sidebarContainer.Controls.Add(this.lblLinewidth);
             this.sidebarContainer.Controls.Add(this.cboLinewidth);
-            this.sidebarContainer.Location = new System.Drawing.Point(871, 15);
-            this.sidebarContainer.Margin = new System.Windows.Forms.Padding(4);
+            this.sidebarContainer.Location = new System.Drawing.Point(653, 12);
             this.sidebarContainer.Name = "sidebarContainer";
-            this.sidebarContainer.Size = new System.Drawing.Size(213, 837);
+            this.sidebarContainer.Size = new System.Drawing.Size(160, 680);
             this.sidebarContainer.TabIndex = 0;
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(13, 30);
-            this.btnSave.Margin = new System.Windows.Forms.Padding(4);
+            this.btnSave.Location = new System.Drawing.Point(10, 24);
             this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(125, 36);
+            this.btnSave.Size = new System.Drawing.Size(94, 29);
             this.btnSave.TabIndex = 0;
             this.btnSave.Text = "Save";
             this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
             // lblObjectType
             // 
             this.lblObjectType.AutoSize = true;
-            this.lblObjectType.Location = new System.Drawing.Point(33, 87);
-            this.lblObjectType.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblObjectType.Location = new System.Drawing.Point(25, 71);
             this.lblObjectType.Name = "lblObjectType";
-            this.lblObjectType.Size = new System.Drawing.Size(85, 17);
+            this.lblObjectType.Size = new System.Drawing.Size(65, 13);
             this.lblObjectType.TabIndex = 13;
             this.lblObjectType.Text = "Object Type";
             // 
@@ -103,20 +100,18 @@
             "Circle (filled)",
             "Dot",
             "Transistor"});
-            this.cboObjectType.Location = new System.Drawing.Point(13, 107);
-            this.cboObjectType.Margin = new System.Windows.Forms.Padding(4);
+            this.cboObjectType.Location = new System.Drawing.Point(10, 87);
             this.cboObjectType.Name = "cboObjectType";
-            this.cboObjectType.Size = new System.Drawing.Size(125, 24);
+            this.cboObjectType.Size = new System.Drawing.Size(95, 21);
             this.cboObjectType.TabIndex = 1;
             this.cboObjectType.Text = "Line";
             // 
             // btnUndo
             // 
             this.btnUndo.Enabled = false;
-            this.btnUndo.Location = new System.Drawing.Point(13, 299);
-            this.btnUndo.Margin = new System.Windows.Forms.Padding(4);
+            this.btnUndo.Location = new System.Drawing.Point(10, 243);
             this.btnUndo.Name = "btnUndo";
-            this.btnUndo.Size = new System.Drawing.Size(125, 36);
+            this.btnUndo.Size = new System.Drawing.Size(94, 29);
             this.btnUndo.TabIndex = 5;
             this.btnUndo.Text = "Undo";
             this.btnUndo.UseVisualStyleBackColor = true;
@@ -124,10 +119,10 @@
             // 
             // btnZoomIn
             // 
-            this.btnZoomIn.Location = new System.Drawing.Point(13, 240);
-            this.btnZoomIn.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnZoomIn.Location = new System.Drawing.Point(10, 195);
+            this.btnZoomIn.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.btnZoomIn.Name = "btnZoomIn";
-            this.btnZoomIn.Size = new System.Drawing.Size(125, 36);
+            this.btnZoomIn.Size = new System.Drawing.Size(94, 29);
             this.btnZoomIn.TabIndex = 4;
             this.btnZoomIn.Text = "Zoom In";
             this.btnZoomIn.UseVisualStyleBackColor = true;
@@ -135,10 +130,10 @@
             // 
             // btnZoomOut
             // 
-            this.btnZoomOut.Location = new System.Drawing.Point(13, 199);
-            this.btnZoomOut.Margin = new System.Windows.Forms.Padding(3, 2, 3, 2);
+            this.btnZoomOut.Location = new System.Drawing.Point(10, 162);
+            this.btnZoomOut.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.btnZoomOut.Name = "btnZoomOut";
-            this.btnZoomOut.Size = new System.Drawing.Size(125, 36);
+            this.btnZoomOut.Size = new System.Drawing.Size(94, 29);
             this.btnZoomOut.TabIndex = 3;
             this.btnZoomOut.Text = "Zoom Out";
             this.btnZoomOut.UseVisualStyleBackColor = true;
@@ -147,10 +142,9 @@
             // lblLinewidth
             // 
             this.lblLinewidth.AutoSize = true;
-            this.lblLinewidth.Location = new System.Drawing.Point(44, 135);
-            this.lblLinewidth.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblLinewidth.Location = new System.Drawing.Point(33, 110);
             this.lblLinewidth.Name = "lblLinewidth";
-            this.lblLinewidth.Size = new System.Drawing.Size(67, 17);
+            this.lblLinewidth.Size = new System.Drawing.Size(52, 13);
             this.lblLinewidth.TabIndex = 9;
             this.lblLinewidth.Text = "Linewidth";
             // 
@@ -165,10 +159,9 @@
             "25",
             "30",
             "35"});
-            this.cboLinewidth.Location = new System.Drawing.Point(12, 155);
-            this.cboLinewidth.Margin = new System.Windows.Forms.Padding(4);
+            this.cboLinewidth.Location = new System.Drawing.Point(9, 126);
             this.cboLinewidth.Name = "cboLinewidth";
-            this.cboLinewidth.Size = new System.Drawing.Size(125, 24);
+            this.cboLinewidth.Size = new System.Drawing.Size(95, 21);
             this.cboLinewidth.TabIndex = 2;
             this.cboLinewidth.Text = "10";
             // 
@@ -177,23 +170,21 @@
             this.mainContainer.AutoScroll = true;
             this.mainContainer.BackColor = System.Drawing.Color.Transparent;
             this.mainContainer.Controls.Add(this.mainDrawCanvas);
-            this.mainContainer.Location = new System.Drawing.Point(9, 6);
-            this.mainContainer.Margin = new System.Windows.Forms.Padding(4);
+            this.mainContainer.Location = new System.Drawing.Point(7, 5);
             this.mainContainer.Name = "mainContainer";
-            this.mainContainer.Size = new System.Drawing.Size(828, 846);
+            this.mainContainer.Size = new System.Drawing.Size(621, 687);
             this.mainContainer.TabIndex = 8;
             // 
             // Form1
             // 
             this.AcceptButton = this.btnSave;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.White;
-            this.ClientSize = new System.Drawing.Size(1097, 902);
+            this.ClientSize = new System.Drawing.Size(823, 733);
             this.Controls.Add(this.mainContainer);
             this.Controls.Add(this.sidebarContainer);
             this.KeyPreview = true;
-            this.Margin = new System.Windows.Forms.Padding(4);
             this.Name = "Form1";
             this.Text = "PCB Drawing Tool";
             this.Load += new System.EventHandler(this.ResizeCompontensToForm);

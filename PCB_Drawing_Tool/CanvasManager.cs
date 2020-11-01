@@ -9,14 +9,36 @@ using System.Windows.Forms;
 
 namespace PCB_Drawing_Tool
 {
-    class CanvasManager
-    {
+	class CanvasManager
+	{
+		private static CanvasManager singleton = null;
 		private Dictionary<int, PictureBox> allCanvasObjects;
-		
-		public CanvasManager()
+
+		private CanvasManager()
 		{
-			allCanvasObjects = new Dictionary<int, PictureBox>();
+			if (FileManager.Singleton.CheckForLastUsedFile())
+            {
+				allCanvasObjects = FileManager.Singleton.ReadFromFile();
+            } 
+			else
+            {
+				allCanvasObjects = new Dictionary<int, PictureBox>();
+            } 
+			
 		}
+
+		public static CanvasManager Singleton
+        {
+			get
+            {
+				if (singleton == null)
+                {
+					singleton = new CanvasManager();
+                }
+				return singleton;
+            }
+        }
+
 
 		public int GetSmallestObjectAspect()
         {
@@ -44,6 +66,16 @@ namespace PCB_Drawing_Tool
 		{
 			return allCanvasObjects.Count();
 		}
+
+		public List<PictureBox> GetAllObjects()
+        {
+			List<PictureBox> allObjects = new List<PictureBox>();
+			for (int i = 1; i <= GetCountOfCanvasObjects(); i++)
+            {
+				allObjects.Add(allCanvasObjects[i]);
+            }
+			return allObjects;
+        }
 
 		public List<int> GetObjectDetails(int objectID)
 		{
