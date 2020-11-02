@@ -15,7 +15,6 @@ namespace PCB_Drawing_Tool
 {
     public partial class Form1 : Form
     {
-        private System.Windows.Forms.Timer mouseDownTracker;
         private PictureBox startDotNewLine;
         private PictureBox previewLine;
 
@@ -23,10 +22,7 @@ namespace PCB_Drawing_Tool
         {
             InitializeComponent();
 
-            mouseDownTracker = new System.Windows.Forms.Timer();
-            mouseDownTracker.Interval = 1;
-            mouseDownTracker.Tick += new EventHandler(CreatePreviewLine);
-            this.WindowState = FormWindowState.Maximized;
+            
             mainDrawCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
         }
 
@@ -34,9 +30,9 @@ namespace PCB_Drawing_Tool
         {
             Control window = sender as Control;
             mainContainer.Size = new Size(window.Width - 150, window.Height - 50);
-            mainContainer.Location = new Point(0, 0);
-            sidebarContainer.Size = new Size(115, window.Height - 60);
-            sidebarContainer.Location = new Point(window.Width - 140, 10);
+            mainContainer.Location = new Point(0, 25);
+            sidebarContainer.Size = new Size(140, window.Height - 60);
+            sidebarContainer.Location = new Point(window.Width - 149, 23);
         }
 
         private void DrawAllObjects(List<PictureBox> objectsToDraw)
@@ -167,7 +163,7 @@ namespace PCB_Drawing_Tool
             mainDrawCanvas.Controls.Add(startDotNewLine);
         }
 
-        private void CreatePreviewLine(object sender, EventArgs e)
+        public void CreatePreviewLine(object sender, EventArgs e)
         {
             ClearMainDrawCanvas(previewLine);
 
@@ -186,9 +182,6 @@ namespace PCB_Drawing_Tool
                 lineLength = Math.Abs(cursorLocation.X - x1);
             }
 
-
-            Console.WriteLine(cursorLocation.X - x1);
-            Console.WriteLine(cursorLocation.Y - y1);
             // South/East-diagonal
             if ((cursorLocation.X - x1) > lineOffset && (cursorLocation.Y - y1) > lineOffset)
             {
@@ -267,7 +260,7 @@ namespace PCB_Drawing_Tool
             if (e.Button == MouseButtons.Left)
             {
                 CreateStartPoint();
-                mouseDownTracker.Start();
+                IntervalManager.Singleton.ManageTimer("mouseDownTracker", true);
             }
         }
 
@@ -275,8 +268,8 @@ namespace PCB_Drawing_Tool
         {
             if (e.Button == MouseButtons.Left)
             {
-                mouseDownTracker.Stop();
-                
+                IntervalManager.Singleton.ManageTimer("mouseDownTracker", false);
+
                 List<int> parameters = GetObjectParameters();
                 switch (parameters.Count)
                 {
@@ -332,12 +325,26 @@ namespace PCB_Drawing_Tool
             {
                 btnUndo.Enabled = false;
             }
-            Console.WriteLine(btnUndo.Enabled);
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
+        private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            FileManager.Singleton.SaveToFile(CanvasManager.Singleton.GetAllObjects());
+            FileManager.Singleton.SaveToFile(sender, e);
+        }
+
+        private void enableAutosaveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (mItemAutoSave.Enabled)
+            {
+                IntervalManager.Singleton.ManageTimer("autosaveCanvas", false);
+                mItemAutoSave.Enabled = false;
+            } 
+            else
+            {
+                IntervalManager.Singleton.ManageTimer("autosaveCanvas", true);
+                mItemAutoSave.Enabled = true;
+            }
+            
         }
     }
 }

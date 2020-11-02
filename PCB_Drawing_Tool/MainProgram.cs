@@ -6,17 +6,21 @@ using System.Windows.Forms;
 
 namespace PCB_Drawing_Tool
 {
-    static class ProgramMain
+    static class MainProgram
     {
-        /// <summary>
-        /// The main entry point for the application.
-        /// </summary>
+        private static Form1 mainForm;
         [STAThread]
         static void Main()
         {
+            mainForm = new Form1();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            Application.Run(mainForm);
+        }
+
+        public static Form1 MainForm
+        {
+            get { return mainForm; }
         }
     }
 }

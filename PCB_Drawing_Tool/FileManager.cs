@@ -14,10 +14,12 @@ namespace PCB_Drawing_Tool
         private static FileManager singleton = null;
         private string filepath;
         private string filename;
+        private string fileExtension;
         const string LASTUSEDFILECONFIG = "fileConfig.txt";
 
         private FileManager()
         {
+            fileExtension = ".txt";
             string[] config = LoadFileConfig().Split(' ');
             filepath = config[0];
             filename = config[1];
@@ -55,17 +57,22 @@ namespace PCB_Drawing_Tool
         private void SaveFileConfig(string filepath, string filename)
         {
             StreamWriter sw = new StreamWriter(LASTUSEDFILECONFIG);
-            sw.WriteLine(filepath + " " + filename + ".txt");
+            sw.WriteLine(filepath + " " + filename + fileExtension);
             sw.Close();
         }
 
         private string LoadFileConfig()
         {
+            if (!File.Exists(LASTUSEDFILECONFIG))
+            {
+                SaveFileConfig("", "NotDefined");
+            }
             return new StreamReader(LASTUSEDFILECONFIG).ReadLine();
         }
 
-        public void SaveToFile(List<PictureBox> infoToStore)
+        public void SaveToFile(object sender, EventArgs e)
         {
+            List<PictureBox> infoToStore = CanvasManager.Singleton.GetAllObjects();
             StreamWriter sw = new StreamWriter(filepath + filename);
             for (int i = 0; i < infoToStore.Count(); i++)
             {
@@ -83,6 +90,7 @@ namespace PCB_Drawing_Tool
 
             while (currentLine != null)
             {
+                Console.WriteLine(currentLine);
                 string[] dataStr = currentLine.Split(' ');
                 int[] dataInt = Array.ConvertAll(dataStr, int.Parse);
 
