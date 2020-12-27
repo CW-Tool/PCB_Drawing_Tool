@@ -16,6 +16,7 @@ namespace PCB_Drawing_Tool
 
 		private CanvasManager()
 		{
+			/*
 			if (FileManager.Singleton.CheckForLastUsedFile())
             {
 				allCanvasObjects = FileManager.Singleton.ReadFromFile();
@@ -24,7 +25,8 @@ namespace PCB_Drawing_Tool
             {
 				allCanvasObjects = new Dictionary<int, PictureBox>();
             } 
-			
+			*/
+			allCanvasObjects = new Dictionary<int, PictureBox>();
 		}
 
 		public static CanvasManager Singleton
@@ -77,6 +79,11 @@ namespace PCB_Drawing_Tool
 			return allObjects;
         }
 
+		public PictureBox GetObject(int objectID)
+        {
+			return allCanvasObjects[objectID];
+        }
+
 		public List<int> GetObjectDetails(int objectID)
 		{
 			PictureBox picObject = allCanvasObjects[objectID]; 
@@ -98,10 +105,12 @@ namespace PCB_Drawing_Tool
             }
         }
 
-		public void AddObject(PictureBox newObject)
+		public int AddObject(PictureBox newObject)
         {
 			int objectID = allCanvasObjects.Count + 1;
 			allCanvasObjects.Add(objectID, newObject);
+			Console.WriteLine(allCanvasObjects);
+			return objectID;
         }
 
 		public void UpdateObject(int id, PictureBox newObject)

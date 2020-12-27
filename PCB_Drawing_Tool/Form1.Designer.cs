@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.mainDrawCanvas = new System.Windows.Forms.PictureBox();
+            this.mainDrawingCanvas = new System.Windows.Forms.PictureBox();
             this.sidebarContainer = new System.Windows.Forms.Panel();
             this.lblObjectType = new System.Windows.Forms.Label();
             this.cboObjectType = new System.Windows.Forms.ComboBox();
@@ -46,7 +46,7 @@
             this.mItemAutoSave = new System.Windows.Forms.ToolStripMenuItem();
             this.hToolStripMenuItem = new System.Windows.Forms.ToolStripSeparator();
             this.mItemSave = new System.Windows.Forms.ToolStripMenuItem();
-            ((System.ComponentModel.ISupportInitialize)(this.mainDrawCanvas)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.mainDrawingCanvas)).BeginInit();
             this.sidebarContainer.SuspendLayout();
             this.mainContainer.SuspendLayout();
             this.menuStrip2.SuspendLayout();
@@ -54,16 +54,16 @@
             // 
             // mainDrawCanvas
             // 
-            this.mainDrawCanvas.BackColor = System.Drawing.Color.Transparent;
-            this.mainDrawCanvas.Location = new System.Drawing.Point(7, 9);
-            this.mainDrawCanvas.Margin = new System.Windows.Forms.Padding(4);
-            this.mainDrawCanvas.Name = "mainDrawCanvas";
-            this.mainDrawCanvas.Size = new System.Drawing.Size(100, 100);
-            this.mainDrawCanvas.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
-            this.mainDrawCanvas.TabIndex = 9;
-            this.mainDrawCanvas.TabStop = false;
-            this.mainDrawCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseDown);
-            this.mainDrawCanvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseUp);
+            this.mainDrawingCanvas.BackColor = System.Drawing.Color.Transparent;
+            this.mainDrawingCanvas.Location = new System.Drawing.Point(7, 9);
+            this.mainDrawingCanvas.Margin = new System.Windows.Forms.Padding(4);
+            this.mainDrawingCanvas.Name = "mainDrawCanvas";
+            this.mainDrawingCanvas.Size = new System.Drawing.Size(100, 100);
+            this.mainDrawingCanvas.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
+            this.mainDrawingCanvas.TabIndex = 9;
+            this.mainDrawingCanvas.TabStop = false;
+            this.mainDrawingCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseDown);
+            this.mainDrawingCanvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseUp);
             // 
             // sidebarContainer
             // 
@@ -173,7 +173,7 @@
             // 
             this.mainContainer.AutoScroll = true;
             this.mainContainer.BackColor = System.Drawing.Color.Transparent;
-            this.mainContainer.Controls.Add(this.mainDrawCanvas);
+            this.mainContainer.Controls.Add(this.mainDrawingCanvas);
             this.mainContainer.Location = new System.Drawing.Point(9, 32);
             this.mainContainer.Margin = new System.Windows.Forms.Padding(4);
             this.mainContainer.Name = "mainContainer";
@@ -259,7 +259,7 @@
             this.Load += new System.EventHandler(this.ResizeCompontensToForm);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.Resize += new System.EventHandler(this.ResizeCompontensToForm);
-            ((System.ComponentModel.ISupportInitialize)(this.mainDrawCanvas)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.mainDrawingCanvas)).EndInit();
             this.sidebarContainer.ResumeLayout(false);
             this.sidebarContainer.PerformLayout();
             this.mainContainer.ResumeLayout(false);
@@ -272,7 +272,7 @@
         }
 
         #endregion
-        private System.Windows.Forms.PictureBox mainDrawCanvas;
+        private System.Windows.Forms.PictureBox mainDrawingCanvas;
         private System.Windows.Forms.Panel sidebarContainer;
         private System.Windows.Forms.Label lblLinewidth;
         private System.Windows.Forms.ComboBox cboLinewidth;

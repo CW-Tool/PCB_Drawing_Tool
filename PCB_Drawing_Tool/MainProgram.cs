@@ -12,9 +12,10 @@ namespace PCB_Drawing_Tool
         [STAThread]
         static void Main()
         {
-            mainForm = new Form1();
-            Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            Application.EnableVisualStyles();
+
+            mainForm = new Form1();
             Application.Run(mainForm);
         }
 

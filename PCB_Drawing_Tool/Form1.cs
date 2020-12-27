@@ -15,16 +15,15 @@ namespace PCB_Drawing_Tool
 {
     public partial class Form1 : Form
     {
-        private PictureBox startDotNewLine;
-        private PictureBox previewLine;
+        private Point startLocation;
+        private PictureBox previewObject;
 
         public Form1()
         {
             InitializeComponent();
-
-            
-            mainDrawCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
+            mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
         }
+
 
         private void ResizeCompontensToForm(object sender, EventArgs e)
         {
@@ -35,71 +34,40 @@ namespace PCB_Drawing_Tool
             sidebarContainer.Location = new Point(window.Width - 149, 23);
         }
 
-        private void DrawAllObjects(List<PictureBox> objectsToDraw)
-        {
-            
-        }
 
         // This overloaded method creates a line.
-        public PictureBox DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
+        public void DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
         {
-            PictureBox graphicObject = new PictureBox
-            {
-                Location = new Point(x1, y1),
-                BackColor = Color.Black,
-                Width = lineLength,
-                Height = lineWidth
-            };
-
-            GraphicsPath gp = new GraphicsPath();
-            gp.AddRectangle(new Rectangle(0, 0, lineLength, lineWidth));
-            Matrix matrix = new Matrix();
-            matrix.RotateAt(lineAngle, new Point(lineLength / 2, lineWidth / 2));
-            gp.Transform(matrix);
-            Region rg = new Region(gp);
-            graphicObject.Region = rg;
-            mainDrawCanvas.Controls.Add(graphicObject);
-
-            graphicObject.Click += new EventHandler(this.SelectLine);
-            return graphicObject;
+            int objectID = new Line(x1, y1, lineLength, lineWidth, lineAngle).Id;
+            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetObject(objectID));
         }
+
 
         // This overloaded method creates a circle (filled/empty)
-        private PictureBox DrawObject(int x1, int y1, int diameter, int y2, bool filled)
+        private void DrawObject(int x1, int y1, int diameter, bool filled)
         {
-            PictureBox graphicObject = new PictureBox
-            {
-                Location = new Point(x1, y1),
-                BackColor = Color.Black,
-                Width = diameter,
-                Height = 500
-            };
+            int objectID = 0;
 
-            if (filled == true)
+            if (filled)
             {
-
+                objectID = new Circle(x1, y1, diameter).Id;
+                Console.WriteLine("filled" + objectID);
+            }
+            else
+            {
+                objectID = new Circle(x1, y1, diameter, Convert.ToInt32(cboLinewidth.Text)).Id;
+                Console.WriteLine("empty" + objectID);
             }
 
-            GraphicsPath gp = new GraphicsPath();
-            gp.AddEllipse(0, 0, 300, 300);
-            Region rg = new Region(gp);
-            graphicObject.Region = rg;
-            mainDrawCanvas.Controls.Add(graphicObject);
-
-            //graphicObject.Click += new EventHandler(this.SelectLine);
-            return graphicObject;
+            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetObject(objectID));
         }
 
-        private void SelectLine(object sender, EventArgs e)
-        {
-            PictureBox clickedLine = sender as PictureBox;
-            clickedLine.BackColor = Color.Red;
-        }
 
         private Point GetCursorPosition()
         {
-            return mainDrawCanvas.PointToClient(Cursor.Position);
+            return mainDrawingCanvas.PointToClient(Cursor.Position);
         }
+
 
         private void ZoomInOut(bool zoomOut)
         {
@@ -112,12 +80,12 @@ namespace PCB_Drawing_Tool
 
             if (CanvasManager.Singleton.GetSmallestObjectAspect() + zoomSize > 0)
             {
-                mainDrawCanvas.Controls.Clear();
+                mainDrawingCanvas.Controls.Clear();
                 int numberOfLines = CanvasManager.Singleton.GetCountOfCanvasObjects();
                 for (int i = 1; i <= numberOfLines; i++)
                 {
                     List<int> info = CanvasManager.Singleton.GetObjectDetails(i);
-                    CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
+                    //CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
@@ -134,43 +102,21 @@ namespace PCB_Drawing_Tool
 
         private void ClearMainDrawCanvas(PictureBox elementToRemove)
         {
-            if (mainDrawCanvas.Controls.Contains(elementToRemove))
+            if (mainDrawingCanvas.Controls.Contains(elementToRemove))
             {
-                mainDrawCanvas.Controls.Remove(elementToRemove);
+                mainDrawingCanvas.Controls.Remove(elementToRemove);
             }
         }
 
-        private void CreateStartPoint()
+
+        public void CreatePreviewObject(object sender, EventArgs e)
         {
-            ClearMainDrawCanvas(startDotNewLine);
-
-            int diameter = Convert.ToInt32(cboLinewidth.Text) < 20 ? Convert.ToInt32(cboLinewidth.Text) + 6 : 20;
-            Point cursorLocation = GetCursorPosition();
-
-            startDotNewLine = new PictureBox
-            {
-                Name = "startDot",
-                Location = new Point(cursorLocation.X - 18, cursorLocation.Y - 18),
-                BackColor = Color.Red,
-                Width = diameter,
-                Height = diameter
-            };
-
-            GraphicsPath gp = new GraphicsPath();
-            gp.AddEllipse(0, 0, diameter, diameter);
-            Region rg = new Region(gp);
-            startDotNewLine.Region = rg;
-            mainDrawCanvas.Controls.Add(startDotNewLine);
-        }
-
-        public void CreatePreviewLine(object sender, EventArgs e)
-        {
-            ClearMainDrawCanvas(previewLine);
+            ClearMainDrawCanvas(previewObject);
 
             Point cursorLocation = GetCursorPosition();
             int penThickness = Int16.Parse(cboLinewidth.Text);
-            int x1 = startDotNewLine.Location.X;
-            int y1 = startDotNewLine.Location.Y;
+            int x1 = startLocation.X;
+            int y1 = startLocation.Y;
             int lineLength = 0;
             int lineWidth = penThickness;
             int lineAngle = 0;
@@ -212,7 +158,7 @@ namespace PCB_Drawing_Tool
                 lineWidth = Math.Abs(cursorLocation.Y - y1);
             }
 
-            previewLine = new PictureBox
+            previewObject = new PictureBox
             {
                 Location = new Point(x1, y1),
                 BackColor = Color.Black,
@@ -228,9 +174,10 @@ namespace PCB_Drawing_Tool
             matrix.RotateAt(lineAngle, new Point(lineLength/2, lineWidth/2));
             gp.Transform(matrix);
             Region rg = new Region(gp);
-            previewLine.Region = rg;
-            mainDrawCanvas.Controls.Add(previewLine);
+            previewObject.Region = rg;
+            mainDrawingCanvas.Controls.Add(previewObject);
         }
+
 
         private List<int> GetObjectParameters()
         {
@@ -238,33 +185,34 @@ namespace PCB_Drawing_Tool
             switch(cboObjectType.Text)
             {
                 case "Line":
-                    parameters.Add(previewLine.Location.X);
-                    parameters.Add(previewLine.Location.Y);
-                    parameters.Add(previewLine.Width);
-                    parameters.Add(previewLine.Height);
-                    parameters.Add(Convert.ToInt32(previewLine.Name));
+                    parameters.Add(previewObject.Location.X);
+                    parameters.Add(previewObject.Location.Y);
+                    parameters.Add(previewObject.Width);
+                    parameters.Add(previewObject.Height);
+                    parameters.Add(Convert.ToInt32(previewObject.Name));
                     break;
                 case "Circle (empty)":
                 case "Circle (filled)":
-                    parameters.Add(previewLine.Location.X);
-                    parameters.Add(previewLine.Location.Y);
-                    parameters.Add(previewLine.Width);
-                    parameters.Add(previewLine.Height);
+                    parameters.Add(previewObject.Location.X);
+                    parameters.Add(previewObject.Location.Y);
+                    parameters.Add(previewObject.Width);
                     break;
             }
             return parameters;
         }
 
-        private void mainDrawBox_MouseDown(object sender, MouseEventArgs e)
+
+        public void mainDrawBox_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                CreateStartPoint();
+                startLocation = GetCursorPosition();
                 IntervalManager.Singleton.ManageTimer("mouseDownTracker", true);
             }
         }
 
-        private void mainDrawBox_MouseUp(object sender, MouseEventArgs e)
+
+        public void mainDrawBox_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -274,32 +222,38 @@ namespace PCB_Drawing_Tool
                 switch (parameters.Count)
                 {
                     case 3:
-                        
-                        break;
-                    case 4:
                         bool filled = cboObjectType.Text == "Circle (empty)" ? false : true;
-                        CanvasManager.Singleton.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], filled));
+                        DrawObject(parameters[0], parameters[1], parameters[2], filled);
                         break;
                     case 5:
-                        CanvasManager.Singleton.AddObject(DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]));
+                        DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
                         break;
                 }
                 
-                ClearMainDrawCanvas(startDotNewLine);
-                ClearMainDrawCanvas(previewLine);
+                ClearMainDrawCanvas(previewObject);
                 UpdateUndoButtonStatus();
             }
         }
+
+
+        public void SelectObject(object sender, EventArgs e)
+        {
+            PictureBox clickedObject = sender as PictureBox;
+            clickedObject.BackColor = Color.Red;
+        }
+
 
         private void btnZoomOut_Click(object sender, EventArgs e)
         {
             ZoomInOut(true);
         }
 
+
         private void btnZoomIn_Click(object sender, EventArgs e)
         {
             ZoomInOut(false);
         }
+
 
         private void Form1_KeyDown(object sender, KeyEventArgs e)
         {
@@ -309,11 +263,13 @@ namespace PCB_Drawing_Tool
             }
         }
 
+
         private void btnUndo_Click(object sender, EventArgs e)
         {
             ClearMainDrawCanvas(CanvasManager.Singleton.RemoveLastObjectFromCanvas());
             UpdateUndoButtonStatus();
         }
+
 
         private void UpdateUndoButtonStatus()
         {
@@ -327,10 +283,12 @@ namespace PCB_Drawing_Tool
             }
         }
 
+
         private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
         {
             FileManager.Singleton.SaveToFile(sender, e);
         }
+
 
         private void enableAutosaveToolStripMenuItem_Click(object sender, EventArgs e)
         {

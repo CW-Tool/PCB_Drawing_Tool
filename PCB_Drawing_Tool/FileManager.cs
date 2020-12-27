@@ -39,12 +39,7 @@ namespace PCB_Drawing_Tool
 
         public bool CheckForLastUsedFile()
         {
-            if (File.Exists(filepath + filename))
-            {
-                return true;
-            }
-            
-            return false;
+            return File.Exists(filepath + filename);
         }
 
         public void UpdateFileConfig(string filepath, string filename)
@@ -81,6 +76,8 @@ namespace PCB_Drawing_Tool
             }
             sw.Close();
         }
+
+
 
         public Dictionary<int, PictureBox> ReadFromFile()
         {

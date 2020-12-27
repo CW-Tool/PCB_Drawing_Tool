@@ -18,7 +18,7 @@ namespace PCB_Drawing_Tool
             
             Timer mouseDownTracker = new Timer();
             mouseDownTracker.Interval = 1;
-            mouseDownTracker.Tick += MainProgram.MainForm.CreatePreviewLine;
+            mouseDownTracker.Tick += MainProgram.MainForm.CreatePreviewObject;
             allTimers["mouseDownTracker"] = mouseDownTracker;
 
             Timer autosaveCanvas = new Timer();
