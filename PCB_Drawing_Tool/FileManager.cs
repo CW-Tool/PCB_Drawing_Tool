@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Drawing;
 
 namespace PCB_Drawing_Tool
 {
@@ -15,7 +10,7 @@ namespace PCB_Drawing_Tool
         private string filepath;
         private string filename;
         private string fileExtension;
-        const string LASTUSEDFILECONFIG = "fileConfig.txt";
+        const string LASTUSEDFILECONFIG = "fileManagerConfig.txt";
 
         private FileManager()
         {
@@ -37,7 +32,7 @@ namespace PCB_Drawing_Tool
             }
         }
 
-        public bool CheckForLastUsedFile()
+        public bool CheckForSavedCanvasObjects()
         {
             return File.Exists(filepath + filename);
         }
@@ -60,47 +55,48 @@ namespace PCB_Drawing_Tool
         {
             if (!File.Exists(LASTUSEDFILECONFIG))
             {
-                SaveFileConfig("", "NotDefined");
+                SaveFileConfig("NotDefined", "NotDefined");
             }
             return new StreamReader(LASTUSEDFILECONFIG).ReadLine();
         }
 
         public void SaveToFile(object sender, EventArgs e)
         {
-            List<PictureBox> infoToStore = CanvasManager.Singleton.GetAllObjects();
             StreamWriter sw = new StreamWriter(filepath + filename);
-            for (int i = 0; i < infoToStore.Count(); i++)
+
+            foreach(CanvasObject element in CanvasManager.Singleton.AllCanvasObjects)
             {
-                PictureBox pb = infoToStore[i];
-                sw.WriteLine(i + " " + pb.Location.X + " " + pb.Location.Y + " " + pb.Width + " " + pb.Height + " " + pb.Name);
+                sw.WriteLine(element.GetType().Name + " " + string.Join(" ", element.GetObjectParameters()));
             }
             sw.Close();
         }
 
-
-
-        public Dictionary<int, PictureBox> ReadFromFile()
+        public void ReadFromFile()
         {
-            Dictionary<int, PictureBox> storedInfo = new Dictionary<int, PictureBox>();
             StreamReader sr = new StreamReader(filepath + filename);
             string currentLine = sr.ReadLine();
 
             while (currentLine != null)
             {
-                Console.WriteLine(currentLine);
-                string[] dataStr = currentLine.Split(' ');
-                int[] dataInt = Array.ConvertAll(dataStr, int.Parse);
+                string[] rawData = currentLine.Split(' ');
+                string objectType = rawData[0];
+                int[] data = Array.ConvertAll(rawData.Skip(1).ToArray(), int.Parse);
 
-                storedInfo.Add(dataInt[0], new PictureBox
+                switch(objectType)
                 {
-                    Location = new Point(dataInt[1], dataInt[2]),
-                    BackColor = Color.Black,
-                    Width = dataInt[3],
-                    Height = dataInt[4]
-                });
+                    case "Line":
+                        new Line(data[0], data[1], data[2], data[3], data[4]);
+                        break;
+                    case "Circle":
+                        new Circle(data[0], data[1], data[2], data[3]);
+                        break;
+                    case "Transistor":
+                        new Transistor(data[0], data[1], data[2], data[3], data[4], data[5]);
+                        break;
+                }
+
             }
             sr.Close();
-            return storedInfo;
         }
     }
 }

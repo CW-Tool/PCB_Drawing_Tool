@@ -22,6 +22,10 @@ namespace PCB_Drawing_Tool
         {
             InitializeComponent();
             mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
+            if (FileManager.Singleton.CheckForSavedCanvasObjects())
+            {
+                FileManager.Singleton.ReadFromFile();
+            }
         }
 
 
@@ -39,7 +43,7 @@ namespace PCB_Drawing_Tool
         public void DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
         {
             int objectID = new Line(x1, y1, lineLength, lineWidth, lineAngle).Id;
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetObject(objectID));
+            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
         }
 
 
@@ -59,7 +63,7 @@ namespace PCB_Drawing_Tool
                 Console.WriteLine("empty" + objectID);
             }
 
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetObject(objectID));
+            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
         }
 
 
@@ -71,6 +75,7 @@ namespace PCB_Drawing_Tool
 
         private void ZoomInOut(bool zoomOut)
         {
+            /*
             int zoomSize = 10;
           
             if (zoomOut)
@@ -85,7 +90,7 @@ namespace PCB_Drawing_Tool
                 for (int i = 1; i <= numberOfLines; i++)
                 {
                     List<int> info = CanvasManager.Singleton.GetObjectDetails(i);
-                    //CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
+                    CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
@@ -97,6 +102,7 @@ namespace PCB_Drawing_Tool
             {
                 MessageBox.Show("Can't Zoom out anymore!");
             }
+            */
         }
 
 

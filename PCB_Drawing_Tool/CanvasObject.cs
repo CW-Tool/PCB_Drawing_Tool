@@ -1,10 +1,32 @@
-﻿using System.Windows.Forms;
+﻿using System.Drawing;
+using System.Windows.Forms;
 
 namespace PCB_Drawing_Tool
 {
     abstract class CanvasObject
     {
+        protected Point coordiantes;
+        protected Color backgroundColor;
+        private int id;
+
+        public int Id
+        {
+            get { return id; }
+        }
+
+        public CanvasObject (int x1, int y1, int id)
+        {
+            coordiantes = new Point(x1, y1);
+            backgroundColor = Color.Black;
+            this.id = id;
+        }
+
         public abstract PictureBox CreateCanvasObject();
+
+        public string[] GetObjectParameters()
+        {
+            return new string[3] { coordiantes.X.ToString(), coordiantes.Y.ToString(), id.ToString() };
+        }
 
         public void AddEventHandlers(PictureBox canvasObject)
         {

@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 
@@ -6,28 +7,26 @@ namespace PCB_Drawing_Tool
 {
     class Circle : CanvasObject
     {
-        private Point coordiantes;
-        private Color backgroundColor;
         private int diameter;
         private int borderWidth;
-        private int id;
 
 
-        public int Id
+        public Circle(int x1, int y1, int diameter, int borderWidth = 0) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
         {
-            get { return id; }
-        }
-
-
-        public Circle(int x1, int y1, int diameter, int borderWidth = 0)
-        {
-            coordiantes = new Point(x1, y1);
-            backgroundColor = Color.Black;
             this.diameter = diameter;
             this.borderWidth = borderWidth;
 
-            id = CanvasManager.Singleton.AddObject(CreateCanvasObject());
+            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
         }
+
+
+        public new string[] GetObjectParameters()
+        {
+            string[] baseParameters = base.GetObjectParameters();
+            string[] classParameters = new string[] { diameter.ToString(), borderWidth.ToString(), Id.ToString() };
+            return baseParameters.Union(classParameters).ToArray();
+        }
+
 
         public override PictureBox CreateCanvasObject()
         {

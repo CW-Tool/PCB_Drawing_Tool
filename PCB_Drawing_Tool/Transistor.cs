@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 
@@ -6,32 +7,30 @@ namespace PCB_Drawing_Tool
 {
     class Transistor : CanvasObject
     {
-        private Point coordiantes;
-        private Color backgroundColor;
         private int length;
         private int height;
         private int borderWidth;
         private int angle;
-        private int id;
 
 
-        public int Id
+        public Transistor(int x1, int y1, int length, int height, int borderWidth, int angle) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
         {
-            get { return id; }
-        }
-
-
-        public Transistor(int x1, int y1, int length, int height, int borderWidth, int angle)
-        {
-            coordiantes = new Point(x1, y1);
-            backgroundColor = Color.Black;
             this.length = length;
             this.height = height;
             this.borderWidth = borderWidth;
             this.angle = angle;
 
-            id = CanvasManager.Singleton.AddObject(CreateCanvasObject());
+            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
         }
+
+
+        public new string[] GetObjectParameters()
+        {
+            string[] baseParameters = base.GetObjectParameters();
+            string[] classParameters = new string[] { length.ToString(), height.ToString(), borderWidth.ToString(), angle.ToString(), Id.ToString() };
+            return baseParameters.Union(classParameters).ToArray();
+        }
+
 
         public override PictureBox CreateCanvasObject()
         {
