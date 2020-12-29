@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Reflection;
+using System.IO;
 
 namespace PCB_Drawing_Tool
 {
@@ -22,10 +23,7 @@ namespace PCB_Drawing_Tool
         {
             InitializeComponent();
             mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
-            if (FileManager.Singleton.CheckForSavedCanvasObjects())
-            {
-                FileManager.Singleton.ReadFromFile();
-            }
+            SetDefaultFilepathValue();
         }
 
 
@@ -38,6 +36,11 @@ namespace PCB_Drawing_Tool
             sidebarContainer.Location = new Point(window.Width - 149, 23);
         }
 
+        private void SetDefaultFilepathValue()
+        {
+            mItemDefLoc.Text = FileManager.Singleton.ReadConfigFile();
+        }
+
 
         // This overloaded method creates a line.
         public void DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
@@ -48,19 +51,17 @@ namespace PCB_Drawing_Tool
 
 
         // This overloaded method creates a circle (filled/empty)
-        private void DrawObject(int x1, int y1, int diameter, bool filled)
+        public void DrawObject(int x1, int y1, int diameter, bool filled)
         {
             int objectID = 0;
 
             if (filled)
             {
                 objectID = new Circle(x1, y1, diameter).Id;
-                Console.WriteLine("filled" + objectID);
             }
             else
             {
                 objectID = new Circle(x1, y1, diameter, Convert.ToInt32(cboLinewidth.Text)).Id;
-                Console.WriteLine("empty" + objectID);
             }
 
             mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
@@ -309,6 +310,23 @@ namespace PCB_Drawing_Tool
                 mItemAutoSave.Enabled = true;
             }
             
+        }
+
+
+        private void mItemSetDefLoc_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog folderBrowser = new OpenFileDialog();
+            folderBrowser.ValidateNames = false;
+            folderBrowser.CheckFileExists = false;
+            folderBrowser.CheckPathExists = true;
+            folderBrowser.FileName = "CanvasObjects.txt";
+
+            if (folderBrowser.ShowDialog() == DialogResult.OK)
+            {
+                FileManager.Singleton.UpdateConfigFile(Path.GetDirectoryName(folderBrowser.FileName) + "\\");
+            }
+
+            SetDefaultFilepathValue();
         }
     }
 }

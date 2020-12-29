@@ -8,16 +8,12 @@ namespace PCB_Drawing_Tool
     {
         private static FileManager singleton = null;
         private string filepath;
-        private string filename;
-        private string fileExtension;
-        const string LASTUSEDFILECONFIG = "fileManagerConfig.txt";
+        const string FILENAME = "CanvasObjects.txt";
+        const string CONFIGFILE = "FileManagerConfig.txt";
 
         private FileManager()
         {
-            fileExtension = ".txt";
-            string[] config = LoadFileConfig().Split(' ');
-            filepath = config[0];
-            filename = config[1];
+            filepath = ReadConfigFile();
         }
 
         public static FileManager Singleton
@@ -34,35 +30,40 @@ namespace PCB_Drawing_Tool
 
         public bool CheckForSavedCanvasObjects()
         {
-            return File.Exists(filepath + filename);
+            return File.Exists(filepath + FILENAME);
         }
 
-        public void UpdateFileConfig(string filepath, string filename)
+        public void UpdateConfigFile(string filepath)
         {
             this.filepath = filepath;
-            this.filename = filename;
-            SaveFileConfig(filepath, filename);
+            SaveConfigFile(filepath);
         }
 
-        private void SaveFileConfig(string filepath, string filename)
+        private void SaveConfigFile(string filepath)
         {
-            StreamWriter sw = new StreamWriter(LASTUSEDFILECONFIG);
-            sw.WriteLine(filepath + " " + filename + fileExtension);
+            StreamWriter sw = new StreamWriter(CONFIGFILE);
+            sw.WriteLine(filepath);
             sw.Close();
         }
 
-        private string LoadFileConfig()
+        public string ReadConfigFile()
         {
-            if (!File.Exists(LASTUSEDFILECONFIG))
+            if (!File.Exists(CONFIGFILE))
             {
-                SaveFileConfig("NotDefined", "NotDefined");
+                SaveConfigFile("Not Defined Jet");
             }
-            return new StreamReader(LASTUSEDFILECONFIG).ReadLine();
+
+            StreamReader sr = new StreamReader(CONFIGFILE);
+            string data = sr.ReadLine();
+            sr.Close();
+
+            return data;
         }
+
 
         public void SaveToFile(object sender, EventArgs e)
         {
-            StreamWriter sw = new StreamWriter(filepath + filename);
+            StreamWriter sw = filepath != "Not Defined Jet" ? new StreamWriter(filepath + FILENAME) : new StreamWriter(FILENAME);
 
             foreach(CanvasObject element in CanvasManager.Singleton.AllCanvasObjects)
             {
@@ -73,10 +74,10 @@ namespace PCB_Drawing_Tool
 
         public void ReadFromFile()
         {
-            StreamReader sr = new StreamReader(filepath + filename);
-            string currentLine = sr.ReadLine();
+            StreamReader sr = new StreamReader(filepath + FILENAME);
+            string currentLine;
 
-            while (currentLine != null)
+            while ((currentLine = sr.ReadLine()) != null)
             {
                 string[] rawData = currentLine.Split(' ');
                 string objectType = rawData[0];
@@ -85,13 +86,14 @@ namespace PCB_Drawing_Tool
                 switch(objectType)
                 {
                     case "Line":
-                        new Line(data[0], data[1], data[2], data[3], data[4]);
+                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4]);
                         break;
                     case "Circle":
-                        new Circle(data[0], data[1], data[2], data[3]);
+                        bool filled = data[3] == 0 ? false : true;
+                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], filled);
                         break;
                     case "Transistor":
-                        new Transistor(data[0], data[1], data[2], data[3], data[4], data[5]);
+                        //MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4], data[5]);
                         break;
                 }
 

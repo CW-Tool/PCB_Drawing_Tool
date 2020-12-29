@@ -23,9 +23,9 @@ namespace PCB_Drawing_Tool
 
         public abstract PictureBox CreateCanvasObject();
 
-        public string[] GetObjectParameters()
+        public virtual string[] GetObjectParameters()
         {
-            return new string[3] { coordiantes.X.ToString(), coordiantes.Y.ToString(), id.ToString() };
+            return new string[] { coordiantes.X.ToString(), coordiantes.Y.ToString() };
         }
 
         public void AddEventHandlers(PictureBox canvasObject)
