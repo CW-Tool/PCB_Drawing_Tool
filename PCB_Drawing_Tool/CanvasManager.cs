@@ -11,16 +11,19 @@ namespace PCB_Drawing_Tool
 		private Dictionary<int, PictureBox> allCanvasGraphics;
 		private List<CanvasObject> allCanvasObjects;
 
+
 		private CanvasManager()
 		{
 			allCanvasGraphics = new Dictionary<int, PictureBox>();
 			allCanvasObjects = new List<CanvasObject>();
 		}
 
+
 		public List<CanvasObject> AllCanvasObjects
 		{
 			get { return allCanvasObjects; }
 		}
+
 
 		public static CanvasManager Singleton
         {
@@ -76,17 +79,10 @@ namespace PCB_Drawing_Tool
 		*/
 
 
-		public int GetCountOfCanvasObjects()
-		{
-			return allCanvasObjects.Count();
-		}
-
-		public PictureBox GetCanvasGraphic(int objectID)
-        {
-			return allCanvasGraphics[objectID];
-        }
-
-
+		/// <summary>
+		/// Removes the last CanvasObject be removing it from both the allCanvasObjects and allCanvasGraphics collection.
+		/// </summary>
+		/// <returns>The corresponding PictureBox which is physically represented on the main Canvas in the Form.</returns>
 		public PictureBox RemoveLastObjectFromCanvas()
         {
 			if (GetCountOfCanvasObjects() > 0)
@@ -104,12 +100,29 @@ namespace PCB_Drawing_Tool
             }
         }
 
+
+		/// <summary>
+		/// Registers the creation of a new CanvasObject, by storing it in the allCanvasObjects and allCanvasGraphics collections.
+		/// </summary>
+		/// <param name="newObject"></param>
+		/// <param name="newGraphic"></param>
 		public void AddObject(CanvasObject newObject, PictureBox newGraphic)
         {
-			int objectID = allCanvasObjects.Count + 1;
+			allCanvasGraphics.Add(allCanvasObjects.Count + 1, newGraphic);
 			allCanvasObjects.Add(newObject);
-			allCanvasGraphics.Add(objectID, newGraphic);	
-        }
+		}
+
+
+		public int GetCountOfCanvasObjects()
+		{
+			return allCanvasObjects.Count();
+		}
+
+
+		public PictureBox GetCanvasGraphic(int objectID)
+		{
+			return allCanvasGraphics[objectID];
+		}
 	}
 }
 

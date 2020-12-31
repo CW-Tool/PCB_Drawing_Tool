@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace PCB_Drawing_Tool
 {
@@ -11,10 +12,12 @@ namespace PCB_Drawing_Tool
         const string FILENAME = "CanvasObjects.txt";
         const string CONFIGFILE = "FileManagerConfig.txt";
 
+
         private FileManager()
         {
-            filepath = ReadConfigFile();
+            filepath = ReadConfigFile()[0];
         }
+
 
         public static FileManager Singleton
         {
@@ -28,42 +31,80 @@ namespace PCB_Drawing_Tool
             }
         }
 
+
+        /// <summary>
+        /// Checks if there exists a text-file containing stored CanvasObject from the previous session.
+        /// </summary>
+        /// <returns>True or false based on if a file exists or not.</returns>
         public bool CheckForSavedCanvasObjects()
         {
             return File.Exists(filepath + FILENAME);
         }
 
-        public void UpdateConfigFile(string filepath)
-        {
-            this.filepath = filepath;
-            SaveConfigFile(filepath);
-        }
 
-        private void SaveConfigFile(string filepath)
+        /// <summary>
+        /// Stores new configuration data in a text-file.
+        /// The data which can be stored is either a local filepath or the status of the autosave feature (true/false). 
+        /// </summary>
+        /// <param name="newConfig">A string of data which is to be stored.</param>
+        public void SaveDefaultConfig(string newConfig)
         {
+            List<string> currentConfig = ReadConfigFile();
             StreamWriter sw = new StreamWriter(CONFIGFILE);
-            sw.WriteLine(filepath);
+
+            if (newConfig != "true" && newConfig != "false")
+            {
+                filepath = newConfig;
+                sw.WriteLine(newConfig);
+                sw.WriteLine(currentConfig[1]);
+            }
+            else
+            {
+                sw.WriteLine(currentConfig[0]);
+                sw.WriteLine(newConfig);
+            }
+            
             sw.Close();
         }
 
-        public string ReadConfigFile()
-        {
-            if (!File.Exists(CONFIGFILE))
-            {
-                SaveConfigFile("Not Defined Jet");
-            }
 
-            StreamReader sr = new StreamReader(CONFIGFILE);
-            string data = sr.ReadLine();
-            sr.Close();
+        /// <summary>
+        /// Gets all the data stored in the configuration text-file.
+        /// </summary>
+        /// <returns>A list with to string objects, first being a filepath and second the status of the autosave feature.</returns>
+        public List<string> ReadConfigFile()
+        {
+            List<string> data = new List<string>();
+
+            if (File.Exists(CONFIGFILE))
+            {
+                StreamReader sr = new StreamReader(CONFIGFILE);
+                string currentLine;
+
+                while ((currentLine = sr.ReadLine()) != null)
+                {
+                    data.Add(currentLine);
+                }
+                sr.Close();
+            }
+            else
+            {
+                data.Add("");
+                data.Add("false");
+            }
 
             return data;
         }
 
 
+        /// <summary>
+        /// Saves all of the currently present CanvasObjects in a text-file in the specified directory.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void SaveToFile(object sender, EventArgs e)
         {
-            StreamWriter sw = filepath != "Not Defined Jet" ? new StreamWriter(filepath + FILENAME) : new StreamWriter(FILENAME);
+            StreamWriter sw = filepath != "" ? new StreamWriter(filepath + FILENAME) : new StreamWriter(FILENAME);
 
             foreach(CanvasObject element in CanvasManager.Singleton.AllCanvasObjects)
             {
@@ -72,6 +113,10 @@ namespace PCB_Drawing_Tool
             sw.Close();
         }
 
+
+        /// <summary>
+        /// Retrieves the stored CanvasObject data, and creates new objects based on it. 
+        /// </summary>
         public void ReadFromFile()
         {
             StreamReader sr = new StreamReader(filepath + FILENAME);
@@ -89,8 +134,7 @@ namespace PCB_Drawing_Tool
                         MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4]);
                         break;
                     case "Circle":
-                        bool filled = data[3] == 0 ? false : true;
-                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], filled);
+                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3]);
                         break;
                     case "Transistor":
                         //MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4], data[5]);

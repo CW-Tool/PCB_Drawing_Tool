@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using System.Windows.Forms;
 
 namespace PCB_Drawing_Tool
@@ -11,6 +7,7 @@ namespace PCB_Drawing_Tool
     {
         private static IntervalManager singleton = null;
         private Dictionary<string, Timer> allTimers;
+
 
         private IntervalManager()
         {
@@ -22,10 +19,11 @@ namespace PCB_Drawing_Tool
             allTimers["mouseDownTracker"] = mouseDownTracker;
 
             Timer autosaveCanvas = new Timer();
-            autosaveCanvas.Interval = 60000;
+            autosaveCanvas.Interval = 10000;
             autosaveCanvas.Tick += FileManager.Singleton.SaveToFile;
             allTimers["autosaveCanvas"] = autosaveCanvas;
         }
+
 
         public static IntervalManager Singleton
         {
@@ -39,13 +37,19 @@ namespace PCB_Drawing_Tool
             }
         }
 
+
+        /// <summary>
+        /// Starts or stops a specific timer.
+        /// </summary>
+        /// <param name="timerName">String defining which timer to modifiy.</param>
+        /// <param name="activate">True = start, False = stop.</param>
         public void ManageTimer(string timerName, bool activate)
         {
             if (activate)
             {
                 allTimers[timerName].Start();
             }
-            else if (!activate)
+            else
             {
                 allTimers[timerName].Stop();
             }

@@ -28,7 +28,7 @@ namespace PCB_Drawing_Tool
         {
             string[] baseParameters = base.GetObjectParameters();
             string[] classParameters = new string[] { length.ToString(), height.ToString(), borderWidth.ToString(), angle.ToString() };
-            return baseParameters.Union(classParameters).ToArray();
+            return baseParameters.Concat(classParameters).ToArray();
         }
 
 

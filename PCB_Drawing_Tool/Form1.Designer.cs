@@ -196,7 +196,7 @@
             this.hToolStripMenuItem,
             this.mItemSave});
             this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(60, 20);
+            this.fileToolStripMenuItem.Size = new System.Drawing.Size(122, 20);
             this.fileToolStripMenuItem.Text = "File";
             // 
             // mItemDefLoc
@@ -206,36 +206,35 @@
             this.mItemDefLoc.Name = "mItemDefLoc";
             this.mItemDefLoc.ReadOnly = true;
             this.mItemDefLoc.Size = new System.Drawing.Size(600, 23);
-            this.mItemDefLoc.Text = "Not Defined Jet";
             // 
             // mItemSetDefLoc
             // 
             this.mItemSetDefLoc.Name = "mItemSetDefLoc";
-            this.mItemSetDefLoc.Size = new System.Drawing.Size(460, 22);
+            this.mItemSetDefLoc.Size = new System.Drawing.Size(660, 22);
             this.mItemSetDefLoc.Text = "Set Default Location";
             this.mItemSetDefLoc.Click += new System.EventHandler(this.mItemSetDefLoc_Click);
             // 
             // gToolStripMenuItem
             // 
             this.gToolStripMenuItem.Name = "gToolStripMenuItem";
-            this.gToolStripMenuItem.Size = new System.Drawing.Size(281, 6);
+            this.gToolStripMenuItem.Size = new System.Drawing.Size(657, 6);
             // 
             // mItemAutoSave
             // 
             this.mItemAutoSave.Name = "mItemAutoSave";
-            this.mItemAutoSave.Size = new System.Drawing.Size(284, 22);
+            this.mItemAutoSave.Size = new System.Drawing.Size(660, 22);
             this.mItemAutoSave.Text = "Enable autosave";
             this.mItemAutoSave.Click += new System.EventHandler(this.enableAutosaveToolStripMenuItem_Click);
             // 
             // hToolStripMenuItem
             // 
             this.hToolStripMenuItem.Name = "hToolStripMenuItem";
-            this.hToolStripMenuItem.Size = new System.Drawing.Size(281, 6);
+            this.hToolStripMenuItem.Size = new System.Drawing.Size(657, 6);
             // 
             // mItemSave
             // 
             this.mItemSave.Name = "mItemSave";
-            this.mItemSave.Size = new System.Drawing.Size(284, 22);
+            this.mItemSave.Size = new System.Drawing.Size(660, 22);
             this.mItemSave.Text = "Save";
             this.mItemSave.Click += new System.EventHandler(this.saveToolStripMenuItem1_Click);
             // 
@@ -252,6 +251,7 @@
             this.Name = "Form1";
             this.Text = "PCB Drawing Tool";
             this.Load += new System.EventHandler(this.ResizeCompontensToForm);
+            this.Load += new System.EventHandler(this.SetAutosaveStatus);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.Resize += new System.EventHandler(this.ResizeCompontensToForm);
             ((System.ComponentModel.ISupportInitialize)(this.mainDrawingCanvas)).EndInit();

@@ -1,4 +1,5 @@
 ﻿using System.Drawing;
+using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
@@ -26,7 +27,7 @@ namespace PCB_Drawing_Tool
         {
             string[] baseParameters = base.GetObjectParameters();
             string[] classParameters = new string[] { length.ToString(), width.ToString(), angle.ToString() };
-            return baseParameters.Union(classParameters).ToArray();
+            return baseParameters.Concat(classParameters).ToArray();
         }
 
 
