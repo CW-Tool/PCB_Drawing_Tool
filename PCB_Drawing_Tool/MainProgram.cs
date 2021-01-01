@@ -16,6 +16,12 @@ namespace PCB_Drawing_Tool
             Application.EnableVisualStyles();
 
             mainForm = new Form1();
+
+            if (FileManager.Singleton.CheckForSavedCanvasObjects())
+            {
+                FileManager.Singleton.ReadFromFile();
+            }
+
             Application.Run(mainForm);
         }
 

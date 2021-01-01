@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Dynamic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PCB_Drawing_Tool
@@ -12,22 +8,22 @@ namespace PCB_Drawing_Tool
 	class CanvasManager
 	{
 		private static CanvasManager singleton = null;
-		private Dictionary<int, PictureBox> allCanvasObjects;
+		private Dictionary<int, PictureBox> allCanvasGraphics;
+		private List<CanvasObject> allCanvasObjects;
+
 
 		private CanvasManager()
 		{
-			/*
-			if (FileManager.Singleton.CheckForLastUsedFile())
-            {
-				allCanvasObjects = FileManager.Singleton.ReadFromFile();
-            } 
-			else
-            {
-				allCanvasObjects = new Dictionary<int, PictureBox>();
-            } 
-			*/
-			allCanvasObjects = new Dictionary<int, PictureBox>();
+			allCanvasGraphics = new Dictionary<int, PictureBox>();
+			allCanvasObjects = new List<CanvasObject>();
 		}
+
+
+		public List<CanvasObject> AllCanvasObjects
+		{
+			get { return allCanvasObjects; }
+		}
+
 
 		public static CanvasManager Singleton
         {
@@ -42,9 +38,26 @@ namespace PCB_Drawing_Tool
         }
 
 
+		/*
+		public void UpdateObject(int id, PictureBox newObject)
+		{
+			allCanvasGraphics[id] = newObject;
+		}
+		
+		public List<int> GetObjectDetails(int objectID)
+		{
+			PictureBox picObject = allCanvasGraphics[objectID]; 
+			return new List<int>(){ picObject.Location.X, picObject.Location.Y, picObject.Width, picObject.Height, Convert.ToInt32(picObject.Name) };
+		}
+
 		public int GetSmallestObjectAspect()
         {
 			int smallestValue = 100000;
+
+			foreach(CanvasObject element in allCanvasObjects)
+            {
+				string[] info = element.GetObjectParameters();
+            }
 
 			for (int i = 1; i <= GetCountOfCanvasObjects(); i++)
 			{
@@ -63,39 +76,21 @@ namespace PCB_Drawing_Tool
 			}
 			return smallestValue;
         }
+		*/
 
-		public int GetCountOfCanvasObjects()
-		{
-			return allCanvasObjects.Count();
-		}
 
-		public List<PictureBox> GetAllObjects()
-        {
-			List<PictureBox> allObjects = new List<PictureBox>();
-			for (int i = 1; i <= GetCountOfCanvasObjects(); i++)
-            {
-				allObjects.Add(allCanvasObjects[i]);
-            }
-			return allObjects;
-        }
-
-		public PictureBox GetObject(int objectID)
-        {
-			return allCanvasObjects[objectID];
-        }
-
-		public List<int> GetObjectDetails(int objectID)
-		{
-			PictureBox picObject = allCanvasObjects[objectID]; 
-			return new List<int>(){ picObject.Location.X, picObject.Location.Y, picObject.Width, picObject.Height, Convert.ToInt32(picObject.Name) };
-		}
-
+		/// <summary>
+		/// Removes the last CanvasObject be removing it from both the allCanvasObjects and allCanvasGraphics collection.
+		/// </summary>
+		/// <returns>The corresponding PictureBox which is physically represented on the main Canvas in the Form.</returns>
 		public PictureBox RemoveLastObjectFromCanvas()
         {
 			if (GetCountOfCanvasObjects() > 0)
             {
-				PictureBox removedObject = allCanvasObjects[allCanvasObjects.Keys.Last()];
-				allCanvasObjects.Remove(allCanvasObjects.Keys.Last());
+				allCanvasObjects.RemoveAt(GetCountOfCanvasObjects() - 1);
+				
+				PictureBox removedObject = allCanvasGraphics[allCanvasGraphics.Keys.Last()];
+				allCanvasGraphics.Remove(allCanvasGraphics.Keys.Last());
 				return removedObject;
             } 
 			else
@@ -105,17 +100,28 @@ namespace PCB_Drawing_Tool
             }
         }
 
-		public int AddObject(PictureBox newObject)
-        {
-			int objectID = allCanvasObjects.Count + 1;
-			allCanvasObjects.Add(objectID, newObject);
-			Console.WriteLine(allCanvasObjects);
-			return objectID;
-        }
 
-		public void UpdateObject(int id, PictureBox newObject)
+		/// <summary>
+		/// Registers the creation of a new CanvasObject, by storing it in the allCanvasObjects and allCanvasGraphics collections.
+		/// </summary>
+		/// <param name="newObject"></param>
+		/// <param name="newGraphic"></param>
+		public void AddObject(CanvasObject newObject, PictureBox newGraphic)
+        {
+			allCanvasGraphics.Add(allCanvasObjects.Count + 1, newGraphic);
+			allCanvasObjects.Add(newObject);
+		}
+
+
+		public int GetCountOfCanvasObjects()
 		{
-			allCanvasObjects[id] = newObject;
+			return allCanvasObjects.Count();
+		}
+
+
+		public PictureBox GetCanvasGraphic(int objectID)
+		{
+			return allCanvasGraphics[objectID];
 		}
 	}
 }

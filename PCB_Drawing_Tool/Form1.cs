@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using System.Reflection;
+using System.IO;
 
 namespace PCB_Drawing_Tool
 {
@@ -18,13 +19,20 @@ namespace PCB_Drawing_Tool
         private Point startLocation;
         private PictureBox previewObject;
 
+
         public Form1()
         {
             InitializeComponent();
             mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
+            SetDefaultFilepathValue();
         }
 
 
+        /// <summary>
+        /// Adjusts the size and location of the layout components which make up the GUI, to fit the size of the current Form. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ResizeCompontensToForm(object sender, EventArgs e)
         {
             Control window = sender as Control;
@@ -35,31 +43,64 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Sets the text property of the "Default Location Textfield" to match the one stored in the configuration. 
+        /// </summary>
+        private void SetDefaultFilepathValue()
+        {
+            string defaultFilepath = FileManager.Singleton.ReadConfigFile()[0];
+            mItemDefLoc.Text = defaultFilepath != "" ? defaultFilepath : "Not Defined Jet";
+        }
+
+
+        /// <summary>
+        /// Checks if autosave is to be active, and enables it if so. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SetAutosaveStatus(object sender, EventArgs e)
+        {
+            string autosaveStatus = FileManager.Singleton.ReadConfigFile()[1];
+            if (autosaveStatus == "true")
+            {
+                ToggleAutosave();
+            }
+        }
+
+
+        /// <summary>
+        /// Changes the current state for the autosave function to the opposite.
+        /// </summary>
+        private void ToggleAutosave()
+        {
+            if (!mItemAutoSave.Checked)
+            {
+                IntervalManager.Singleton.ManageTimer("autosaveCanvas", true);
+                FileManager.Singleton.SaveDefaultConfig("true");
+                mItemAutoSave.Checked = true;
+            }
+            else
+            {
+                IntervalManager.Singleton.ManageTimer("autosaveCanvas", false);
+                FileManager.Singleton.SaveDefaultConfig("false");
+                mItemAutoSave.Checked = false;
+            }
+        }
+
+
         // This overloaded method creates a line.
         public void DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
-        {
+        {        
             int objectID = new Line(x1, y1, lineLength, lineWidth, lineAngle).Id;
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetObject(objectID));
+            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
         }
 
 
         // This overloaded method creates a circle (filled/empty)
-        private void DrawObject(int x1, int y1, int diameter, bool filled)
+        public void DrawObject(int x1, int y1, int diameter, int borderWidth)
         {
-            int objectID = 0;
-
-            if (filled)
-            {
-                objectID = new Circle(x1, y1, diameter).Id;
-                Console.WriteLine("filled" + objectID);
-            }
-            else
-            {
-                objectID = new Circle(x1, y1, diameter, Convert.ToInt32(cboLinewidth.Text)).Id;
-                Console.WriteLine("empty" + objectID);
-            }
-
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetObject(objectID));
+            int objectID = new Circle(x1, y1, diameter, borderWidth).Id;
+            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
         }
 
 
@@ -71,6 +112,7 @@ namespace PCB_Drawing_Tool
 
         private void ZoomInOut(bool zoomOut)
         {
+            /*
             int zoomSize = 10;
           
             if (zoomOut)
@@ -85,7 +127,7 @@ namespace PCB_Drawing_Tool
                 for (int i = 1; i <= numberOfLines; i++)
                 {
                     List<int> info = CanvasManager.Singleton.GetObjectDetails(i);
-                    //CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
+                    CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
@@ -97,6 +139,7 @@ namespace PCB_Drawing_Tool
             {
                 MessageBox.Show("Can't Zoom out anymore!");
             }
+            */
         }
 
 
@@ -222,8 +265,8 @@ namespace PCB_Drawing_Tool
                 switch (parameters.Count)
                 {
                     case 3:
-                        bool filled = cboObjectType.Text == "Circle (empty)" ? false : true;
-                        DrawObject(parameters[0], parameters[1], parameters[2], filled);
+                        int borderWidth = cboObjectType.Text == "Circle (empty)" ? Convert.ToInt32(cboLinewidth.Text) : 0;
+                        DrawObject(parameters[0], parameters[1], parameters[2], borderWidth);
                         break;
                     case 5:
                         DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
@@ -292,17 +335,24 @@ namespace PCB_Drawing_Tool
 
         private void enableAutosaveToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (mItemAutoSave.Enabled)
+            ToggleAutosave();
+        }
+
+
+        private void mItemSetDefLoc_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog folderBrowser = new OpenFileDialog();
+            folderBrowser.ValidateNames = false;
+            folderBrowser.CheckFileExists = false;
+            folderBrowser.CheckPathExists = true;
+            folderBrowser.FileName = "CanvasObjects.txt";
+
+            if (folderBrowser.ShowDialog() == DialogResult.OK)
             {
-                IntervalManager.Singleton.ManageTimer("autosaveCanvas", false);
-                mItemAutoSave.Enabled = false;
-            } 
-            else
-            {
-                IntervalManager.Singleton.ManageTimer("autosaveCanvas", true);
-                mItemAutoSave.Enabled = true;
+                FileManager.Singleton.SaveDefaultConfig(Path.GetDirectoryName(folderBrowser.FileName) + "\\");
             }
-            
+
+            SetDefaultFilepathValue();
         }
     }
 }

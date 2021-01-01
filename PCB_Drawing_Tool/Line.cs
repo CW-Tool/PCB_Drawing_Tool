@@ -1,4 +1,6 @@
 ﻿using System.Drawing;
+using System;
+using System.Linq;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 
@@ -6,28 +8,26 @@ namespace PCB_Drawing_Tool
 {
     class Line : CanvasObject
     {
-        private Point coordiantes;
-        private Color backgroundColor;
         private int length;
         private int width;
         private int angle;
-        private int id;
 
 
-        public int Id
+        public Line(int x1, int y1, int lineLength, int lineWidth, int lineAngle) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
         {
-            get { return id; }
-        }
-
-        public Line(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
-        {
-            coordiantes = new Point(x1, y1);
-            backgroundColor = Color.Black;
             length = lineLength;
             width = lineWidth;
             angle = lineAngle;
 
-            id = CanvasManager.Singleton.AddObject(CreateCanvasObject());
+            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
+        }
+
+
+        public override string[] GetObjectParameters()
+        {
+            string[] baseParameters = base.GetObjectParameters();
+            string[] classParameters = new string[] { length.ToString(), width.ToString(), angle.ToString() };
+            return baseParameters.Concat(classParameters).ToArray();
         }
 
 

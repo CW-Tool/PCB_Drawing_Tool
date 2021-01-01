@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Drawing;
+using System.Collections.Generic;
 
 namespace PCB_Drawing_Tool
 {
@@ -13,17 +9,15 @@ namespace PCB_Drawing_Tool
     {
         private static FileManager singleton = null;
         private string filepath;
-        private string filename;
-        private string fileExtension;
-        const string LASTUSEDFILECONFIG = "fileConfig.txt";
+        const string FILENAME = "CanvasObjects.txt";
+        const string CONFIGFILE = "FileManagerConfig.txt";
+
 
         private FileManager()
         {
-            fileExtension = ".txt";
-            string[] config = LoadFileConfig().Split(' ');
-            filepath = config[0];
-            filename = config[1];
+            filepath = ReadConfigFile()[0];
         }
+
 
         public static FileManager Singleton
         {
@@ -37,70 +31,118 @@ namespace PCB_Drawing_Tool
             }
         }
 
-        public bool CheckForLastUsedFile()
+
+        /// <summary>
+        /// Checks if there exists a text-file containing stored CanvasObject from the previous session.
+        /// </summary>
+        /// <returns>True or false based on if a file exists or not.</returns>
+        public bool CheckForSavedCanvasObjects()
         {
-            return File.Exists(filepath + filename);
+            return File.Exists(filepath + FILENAME);
         }
 
-        public void UpdateFileConfig(string filepath, string filename)
-        {
-            this.filepath = filepath;
-            this.filename = filename;
-            SaveFileConfig(filepath, filename);
-        }
 
-        private void SaveFileConfig(string filepath, string filename)
+        /// <summary>
+        /// Stores new configuration data in a text-file.
+        /// The data which can be stored is either a local filepath or the status of the autosave feature (true/false). 
+        /// </summary>
+        /// <param name="newConfig">A string of data which is to be stored.</param>
+        public void SaveDefaultConfig(string newConfig)
         {
-            StreamWriter sw = new StreamWriter(LASTUSEDFILECONFIG);
-            sw.WriteLine(filepath + " " + filename + fileExtension);
+            List<string> currentConfig = ReadConfigFile();
+            StreamWriter sw = new StreamWriter(CONFIGFILE);
+
+            if (newConfig != "true" && newConfig != "false")
+            {
+                filepath = newConfig;
+                sw.WriteLine(newConfig);
+                sw.WriteLine(currentConfig[1]);
+            }
+            else
+            {
+                sw.WriteLine(currentConfig[0]);
+                sw.WriteLine(newConfig);
+            }
+            
             sw.Close();
         }
 
-        private string LoadFileConfig()
+
+        /// <summary>
+        /// Gets all the data stored in the configuration text-file.
+        /// </summary>
+        /// <returns>A list with to string objects, first being a filepath and second the status of the autosave feature.</returns>
+        public List<string> ReadConfigFile()
         {
-            if (!File.Exists(LASTUSEDFILECONFIG))
+            List<string> data = new List<string>();
+
+            if (File.Exists(CONFIGFILE))
             {
-                SaveFileConfig("", "NotDefined");
+                StreamReader sr = new StreamReader(CONFIGFILE);
+                string currentLine;
+
+                while ((currentLine = sr.ReadLine()) != null)
+                {
+                    data.Add(currentLine);
+                }
+                sr.Close();
             }
-            return new StreamReader(LASTUSEDFILECONFIG).ReadLine();
+            else
+            {
+                data.Add("");
+                data.Add("false");
+            }
+
+            return data;
         }
 
+
+        /// <summary>
+        /// Saves all of the currently present CanvasObjects in a text-file in the specified directory.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void SaveToFile(object sender, EventArgs e)
         {
-            List<PictureBox> infoToStore = CanvasManager.Singleton.GetAllObjects();
-            StreamWriter sw = new StreamWriter(filepath + filename);
-            for (int i = 0; i < infoToStore.Count(); i++)
+            StreamWriter sw = filepath != "" ? new StreamWriter(filepath + FILENAME) : new StreamWriter(FILENAME);
+
+            foreach(CanvasObject element in CanvasManager.Singleton.AllCanvasObjects)
             {
-                PictureBox pb = infoToStore[i];
-                sw.WriteLine(i + " " + pb.Location.X + " " + pb.Location.Y + " " + pb.Width + " " + pb.Height + " " + pb.Name);
+                sw.WriteLine(element.GetType().Name + " " + string.Join(" ", element.GetObjectParameters()));
             }
             sw.Close();
         }
 
 
-
-        public Dictionary<int, PictureBox> ReadFromFile()
+        /// <summary>
+        /// Retrieves the stored CanvasObject data, and creates new objects based on it. 
+        /// </summary>
+        public void ReadFromFile()
         {
-            Dictionary<int, PictureBox> storedInfo = new Dictionary<int, PictureBox>();
-            StreamReader sr = new StreamReader(filepath + filename);
-            string currentLine = sr.ReadLine();
+            StreamReader sr = new StreamReader(filepath + FILENAME);
+            string currentLine;
 
-            while (currentLine != null)
+            while ((currentLine = sr.ReadLine()) != null)
             {
-                Console.WriteLine(currentLine);
-                string[] dataStr = currentLine.Split(' ');
-                int[] dataInt = Array.ConvertAll(dataStr, int.Parse);
+                string[] rawData = currentLine.Split(' ');
+                string objectType = rawData[0];
+                int[] data = Array.ConvertAll(rawData.Skip(1).ToArray(), int.Parse);
 
-                storedInfo.Add(dataInt[0], new PictureBox
+                switch(objectType)
                 {
-                    Location = new Point(dataInt[1], dataInt[2]),
-                    BackColor = Color.Black,
-                    Width = dataInt[3],
-                    Height = dataInt[4]
-                });
+                    case "Line":
+                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4]);
+                        break;
+                    case "Circle":
+                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3]);
+                        break;
+                    case "Transistor":
+                        //MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4], data[5]);
+                        break;
+                }
+
             }
             sr.Close();
-            return storedInfo;
         }
     }
 }
