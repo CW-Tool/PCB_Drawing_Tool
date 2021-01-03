@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,11 +19,15 @@ namespace PCB_Drawing_Tool
     {
         private Point startLocation;
         private PictureBox previewObject;
+        private CanvasManager cm;
+        private FileManager fm;
 
 
         public Form1()
         {
             InitializeComponent();
+            cm = CanvasManager.Singleton;
+            fm = FileManager.Singleton;
             mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
             SetDefaultFilepathValue();
         }
@@ -48,7 +53,7 @@ namespace PCB_Drawing_Tool
         /// </summary>
         private void SetDefaultFilepathValue()
         {
-            string defaultFilepath = FileManager.Singleton.ReadConfigFile()[0];
+            string defaultFilepath = fm.ReadConfigFile()[0];
             mItemDefLoc.Text = defaultFilepath != "" ? defaultFilepath : "Not Defined Jet";
         }
 
@@ -60,7 +65,7 @@ namespace PCB_Drawing_Tool
         /// <param name="e"></param>
         private void SetAutosaveStatus(object sender, EventArgs e)
         {
-            string autosaveStatus = FileManager.Singleton.ReadConfigFile()[1];
+            string autosaveStatus = fm.ReadConfigFile()[1];
             if (autosaveStatus == "true")
             {
                 ToggleAutosave();
@@ -76,13 +81,13 @@ namespace PCB_Drawing_Tool
             if (!mItemAutoSave.Checked)
             {
                 IntervalManager.Singleton.ManageTimer("autosaveCanvas", true);
-                FileManager.Singleton.SaveDefaultConfig("true");
+                fm.SaveDefaultConfig("true");
                 mItemAutoSave.Checked = true;
             }
             else
             {
                 IntervalManager.Singleton.ManageTimer("autosaveCanvas", false);
-                FileManager.Singleton.SaveDefaultConfig("false");
+                fm.SaveDefaultConfig("false");
                 mItemAutoSave.Checked = false;
             }
         }
@@ -91,16 +96,20 @@ namespace PCB_Drawing_Tool
         // This overloaded method creates a line.
         public void DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
         {        
-            int objectID = new Line(x1, y1, lineLength, lineWidth, lineAngle).Id;
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
+            Line newLine = new Line(x1, y1, lineLength, lineWidth, lineAngle);
+            PictureBox newPicBox = newLine.CreateCanvasObject();
+            cm.AddObject(newLine, newPicBox);
+            mainDrawingCanvas.Controls.Add(newPicBox);
         }
 
 
         // This overloaded method creates a circle (filled/empty)
         public void DrawObject(int x1, int y1, int diameter, int borderWidth)
         {
-            int objectID = new Circle(x1, y1, diameter, borderWidth).Id;
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
+            Circle newCircle = new Circle(x1, y1, diameter, borderWidth);
+            PictureBox newPicBox = newCircle.CreateCanvasObject();
+            cm.AddObject(newCircle, newPicBox);
+            mainDrawingCanvas.Controls.Add(newPicBox);
         }
 
 
@@ -112,7 +121,6 @@ namespace PCB_Drawing_Tool
 
         private void ZoomInOut(bool zoomOut)
         {
-            /*
             int zoomSize = 10;
           
             if (zoomOut)
@@ -120,14 +128,24 @@ namespace PCB_Drawing_Tool
                 zoomSize *= -1;
             }
 
-            if (CanvasManager.Singleton.GetSmallestObjectAspect() + zoomSize > 0)
+            if (cm.GetSmallestObjectAspect() + zoomSize > 0)
             {
                 mainDrawingCanvas.Controls.Clear();
-                int numberOfLines = CanvasManager.Singleton.GetCountOfCanvasObjects();
-                for (int i = 1; i <= numberOfLines; i++)
+
+                foreach(var entry in cm.AllCanvasObjects.ToList())
                 {
-                    List<int> info = CanvasManager.Singleton.GetObjectDetails(i);
-                    CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
+                    int[] data = Array.ConvertAll(entry.Key.GetObjectParameters(), int.Parse);
+                    cm.AllCanvasObjects.Remove(entry.Key);
+
+                    switch (data.Length)
+                    {
+                        case 4:
+                            DrawObject(data[0], data[1], data[2] + zoomSize, data[3] + zoomSize);
+                            break;
+                        case 5:
+                            DrawObject(data[0], data[1], data[2] + zoomSize, data[3] + zoomSize, data[4]);
+                            break;
+                    }
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
@@ -139,7 +157,6 @@ namespace PCB_Drawing_Tool
             {
                 MessageBox.Show("Can't Zoom out anymore!");
             }
-            */
         }
 
 
@@ -302,21 +319,21 @@ namespace PCB_Drawing_Tool
         {
             if (e.Control && e.KeyCode == Keys.Z)
             {
-                ClearMainDrawCanvas(CanvasManager.Singleton.RemoveLastObjectFromCanvas());
+                ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
             }
         }
 
 
         private void btnUndo_Click(object sender, EventArgs e)
         {
-            ClearMainDrawCanvas(CanvasManager.Singleton.RemoveLastObjectFromCanvas());
+            ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
             UpdateUndoButtonStatus();
         }
 
 
         private void UpdateUndoButtonStatus()
         {
-            if (CanvasManager.Singleton.GetCountOfCanvasObjects() > 0)
+            if (cm.GetCountOfCanvasObjects() > 0)
             {
                 btnUndo.Enabled = true;
             }
@@ -329,7 +346,7 @@ namespace PCB_Drawing_Tool
 
         private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            FileManager.Singleton.SaveToFile(sender, e);
+            fm.SaveToFile(sender, e);
         }
 
 
@@ -349,7 +366,7 @@ namespace PCB_Drawing_Tool
 
             if (folderBrowser.ShowDialog() == DialogResult.OK)
             {
-                FileManager.Singleton.SaveDefaultConfig(Path.GetDirectoryName(folderBrowser.FileName) + "\\");
+                fm.SaveDefaultConfig(Path.GetDirectoryName(folderBrowser.FileName) + "\\");
             }
 
             SetDefaultFilepathValue();

@@ -13,14 +13,12 @@ namespace PCB_Drawing_Tool
         private int angle;
 
 
-        public Transistor(int x1, int y1, int length, int height, int borderWidth, int angle) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
+        public Transistor(int x1, int y1, int length, int height, int borderWidth, int angle) : base(x1, y1)
         {
             this.length = length;
             this.height = height;
             this.borderWidth = borderWidth;
             this.angle = angle;
-
-            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
         }
 
 

@@ -13,13 +13,11 @@ namespace PCB_Drawing_Tool
         private int angle;
 
 
-        public Line(int x1, int y1, int lineLength, int lineWidth, int lineAngle) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
+        public Line(int x1, int y1, int lineLength, int lineWidth, int lineAngle) : base(x1, y1)
         {
             length = lineLength;
             width = lineWidth;
             angle = lineAngle;
-
-            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
         }
 
 

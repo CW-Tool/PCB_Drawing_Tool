@@ -7,20 +7,11 @@ namespace PCB_Drawing_Tool
     {
         protected Point coordiantes;
         protected Color backgroundColor;
-        private int id;
 
-
-        public int Id
-        {
-            get { return id; }
-        }
-
-
-        public CanvasObject (int x1, int y1, int id)
+        public CanvasObject (int x1, int y1)
         {
             coordiantes = new Point(x1, y1);
             backgroundColor = Color.Black;
-            this.id = id;
         }
 
 

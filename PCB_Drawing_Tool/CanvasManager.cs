@@ -8,18 +8,16 @@ namespace PCB_Drawing_Tool
 	class CanvasManager
 	{
 		private static CanvasManager singleton = null;
-		private Dictionary<int, PictureBox> allCanvasGraphics;
-		private List<CanvasObject> allCanvasObjects;
+		private Dictionary<CanvasObject, PictureBox> allCanvasObjects;
 
 
 		private CanvasManager()
 		{
-			allCanvasGraphics = new Dictionary<int, PictureBox>();
-			allCanvasObjects = new List<CanvasObject>();
+			allCanvasObjects = new Dictionary<CanvasObject, PictureBox>();
 		}
 
 
-		public List<CanvasObject> AllCanvasObjects
+		public Dictionary<CanvasObject, PictureBox> AllCanvasObjects
 		{
 			get { return allCanvasObjects; }
 		}
@@ -36,24 +34,13 @@ namespace PCB_Drawing_Tool
 				return singleton;
             }
         }
-
-
-		/*
-		public void UpdateObject(int id, PictureBox newObject)
-		{
-			allCanvasGraphics[id] = newObject;
-		}
-		
-		public List<int> GetObjectDetails(int objectID)
-		{
-			PictureBox picObject = allCanvasGraphics[objectID]; 
-			return new List<int>(){ picObject.Location.X, picObject.Location.Y, picObject.Width, picObject.Height, Convert.ToInt32(picObject.Name) };
-		}
+	
 
 		public int GetSmallestObjectAspect()
         {
-			int smallestValue = 100000;
+			int smallestValue = 10;
 
+			/*
 			foreach(CanvasObject element in allCanvasObjects)
             {
 				string[] info = element.GetObjectParameters();
@@ -74,9 +61,15 @@ namespace PCB_Drawing_Tool
                     }
                 }
 			}
+			*/
 			return smallestValue;
         }
-		*/
+
+
+		public void UpdateObject(CanvasObject objectToChange, PictureBox newGraphic)
+        {
+			allCanvasObjects[objectToChange] = newGraphic;
+		}
 
 
 		/// <summary>
@@ -84,21 +77,19 @@ namespace PCB_Drawing_Tool
 		/// </summary>
 		/// <returns>The corresponding PictureBox which is physically represented on the main Canvas in the Form.</returns>
 		public PictureBox RemoveLastObjectFromCanvas()
-        {
+		{
 			if (GetCountOfCanvasObjects() > 0)
-            {
-				allCanvasObjects.RemoveAt(GetCountOfCanvasObjects() - 1);
-				
-				PictureBox removedObject = allCanvasGraphics[allCanvasGraphics.Keys.Last()];
-				allCanvasGraphics.Remove(allCanvasGraphics.Keys.Last());
+			{
+				PictureBox removedObject = allCanvasObjects[allCanvasObjects.Keys.Last()];
+				allCanvasObjects.Remove(allCanvasObjects.Keys.Last());
 				return removedObject;
-            } 
+			}
 			else
-            {
+			{
 				MessageBox.Show("There are no objects that can be removed!");
 				return null;
-            }
-        }
+			}
+		}
 
 
 		/// <summary>
@@ -108,8 +99,7 @@ namespace PCB_Drawing_Tool
 		/// <param name="newGraphic"></param>
 		public void AddObject(CanvasObject newObject, PictureBox newGraphic)
         {
-			allCanvasGraphics.Add(allCanvasObjects.Count + 1, newGraphic);
-			allCanvasObjects.Add(newObject);
+			allCanvasObjects.Add(newObject, newGraphic);
 		}
 
 
@@ -119,9 +109,9 @@ namespace PCB_Drawing_Tool
 		}
 
 
-		public PictureBox GetCanvasGraphic(int objectID)
+		public PictureBox GetObjectGraphic(CanvasObject objectKey)
 		{
-			return allCanvasGraphics[objectID];
+			return allCanvasObjects[objectKey];
 		}
 	}
 }

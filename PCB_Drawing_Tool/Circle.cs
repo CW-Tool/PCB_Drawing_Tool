@@ -12,12 +12,10 @@ namespace PCB_Drawing_Tool
         private int borderWidth;
 
 
-        public Circle(int x1, int y1, int diameter, int borderWidth) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
+        public Circle(int x1, int y1, int diameter, int borderWidth) : base(x1, y1)
         {
             this.diameter = diameter;
             this.borderWidth = borderWidth;
-
-            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
         }
 
 
