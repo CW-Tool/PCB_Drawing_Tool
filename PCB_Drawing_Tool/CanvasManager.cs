@@ -66,9 +66,10 @@ namespace PCB_Drawing_Tool
         }
 
 
-		public void UpdateObject(CanvasObject objectToChange, PictureBox newGraphic)
+		public void UpdateObject(CanvasObject objectToChange, CanvasObject newObject, PictureBox newGraphic)
         {
-			allCanvasObjects[objectToChange] = newGraphic;
+			allCanvasObjects.Remove(objectToChange);
+			allCanvasObjects.Add(newObject, newGraphic);
 		}
 
 

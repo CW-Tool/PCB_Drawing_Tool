@@ -19,8 +19,10 @@ namespace PCB_Drawing_Tool
     {
         private Point startLocation;
         private PictureBox previewObject;
+        private PictureBox selectedLine;
         private CanvasManager cm;
         private FileManager fm;
+        private Size defaultCanvasSize;
 
 
         public Form1()
@@ -28,7 +30,9 @@ namespace PCB_Drawing_Tool
             InitializeComponent();
             cm = CanvasManager.Singleton;
             fm = FileManager.Singleton;
-            mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
+            WindowState = FormWindowState.Maximized;
+            defaultCanvasSize = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
+            mainDrawingCanvas.Size = defaultCanvasSize;
             SetDefaultFilepathValue();
         }
 
@@ -41,7 +45,7 @@ namespace PCB_Drawing_Tool
         private void ResizeCompontensToForm(object sender, EventArgs e)
         {
             Control window = sender as Control;
-            mainContainer.Size = new Size(window.Width - 150, window.Height - 50);
+            mainContainer.Size = new Size(window.Width - 150, window.Height - 66);
             mainContainer.Location = new Point(0, 25);
             sidebarContainer.Size = new Size(140, window.Height - 60);
             sidebarContainer.Location = new Point(window.Width - 149, 23);
@@ -92,6 +96,16 @@ namespace PCB_Drawing_Tool
             }
         }
 
+        private void ExtendCanvas(int objectWidth, int objectHeight)
+        {
+            int w = mainDrawingCanvas.Width;
+            int h = mainDrawingCanvas.Height;
+            if ((w - objectWidth) < 100 || (h - objectHeight) < 100 || (w - objectHeight) < 100 || (h - objectWidth) < 100)
+            {
+                mainDrawingCanvas.Size = new Size(mainDrawingCanvas.Width + 100, mainDrawingCanvas.Height + 100);
+            }
+        }
+
 
         // This overloaded method creates a line.
         public void DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
@@ -99,6 +113,7 @@ namespace PCB_Drawing_Tool
             Line newLine = new Line(x1, y1, lineLength, lineWidth, lineAngle);
             PictureBox newPicBox = newLine.CreateCanvasObject();
             cm.AddObject(newLine, newPicBox);
+            ExtendCanvas(x1 + lineWidth, y1 + lineLength);
             mainDrawingCanvas.Controls.Add(newPicBox);
         }
 
@@ -109,6 +124,7 @@ namespace PCB_Drawing_Tool
             Circle newCircle = new Circle(x1, y1, diameter, borderWidth);
             PictureBox newPicBox = newCircle.CreateCanvasObject();
             cm.AddObject(newCircle, newPicBox);
+            ExtendCanvas(x1 + diameter, y1 + diameter);
             mainDrawingCanvas.Controls.Add(newPicBox);
         }
 
@@ -121,43 +137,86 @@ namespace PCB_Drawing_Tool
 
         private void ZoomInOut(bool zoomOut)
         {
+            string rawString = txtCanvasZoom.Text;
+            int currentZoom = Convert.ToInt32(rawString.Substring(0, rawString.Length - 2));
+
+
             int zoomSize = 10;
-          
+
             if (zoomOut)
             {
                 zoomSize *= -1;
             }
 
-            if (cm.GetSmallestObjectAspect() + zoomSize > 0)
+            mainDrawingCanvas.Controls.Clear();
+
+            Dictionary<CanvasObject, PictureBox> tmpAllCanvasObjects = new Dictionary<CanvasObject, PictureBox>(cm.AllCanvasObjects);
+
+            foreach (var element in tmpAllCanvasObjects)
+            {
+                string[] rawData = element.Key.GetObjectParameters();
+                int[] data = Array.ConvertAll(rawData, int.Parse);
+
+                Console.WriteLine(element);
+
+                switch (element.Key.GetType().Name)
+                {
+                    case "Line":
+                        DrawObject(data[0] + zoomSize, data[1] + zoomSize, data[2] + zoomSize, data[3] + zoomSize, data[4]);
+                        break;
+                    case "Circle":
+                        DrawObject(data[0], data[1], data[2], data[3]);
+                        break;
+                    case "Transistor":
+                        //Transistor newTransistor = new Transistor(data[0], data[1], data[2], data[3], data[4], data[5]);
+                        break;
+                }
+
+                cm.AllCanvasObjects.Remove(element.Key);
+            }
+
+
+
+            /*
+            if (CanvasManager.Singleton.GetSmallestObjectAspect() + zoomSize > 0)
             {
                 mainDrawingCanvas.Controls.Clear();
-
-                foreach(var entry in cm.AllCanvasObjects.ToList())
+                int numberOfLines = CanvasManager.Singleton.GetCountOfCanvasObjects();
+                for (int i = 1; i <= numberOfLines; i++)
                 {
-                    int[] data = Array.ConvertAll(entry.Key.GetObjectParameters(), int.Parse);
-                    cm.AllCanvasObjects.Remove(entry.Key);
-
-                    switch (data.Length)
-                    {
-                        case 4:
-                            DrawObject(data[0], data[1], data[2] + zoomSize, data[3] + zoomSize);
-                            break;
-                        case 5:
-                            DrawObject(data[0], data[1], data[2] + zoomSize, data[3] + zoomSize, data[4]);
-                            break;
-                    }
+                    List<int> info = CanvasManager.Singleton.GetObjectDetails(i);
+                    cm.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
                 {
                     cboLinewidth.Items[i] = (Convert.ToInt32(cboLinewidth.Items[i]) + zoomSize).ToString();
-                } 
-            }   
-            else
-            {
-                MessageBox.Show("Can't Zoom out anymore!");
+                }
+
+
+                /*
+                if ((zoomOut && currentZoom != 10) || (!zoomOut && currentZoom != 190))
+                {
+                    //mainDrawingCanvas.Scale(new SizeF(1 + ((float)(100 - currentZoom) / (float)100), 1 + ((float)(100 - currentZoom) / (float)100)));
+
+                    float zoomSize;
+
+                    if (zoomOut && currentZoom <= 100 || !zoomOut && currentZoom < 100)
+                    {
+                        zoomSize = zoomOut ? ((float)currentZoom - 10) / (float)100 : 1 + (1 - ((float)currentZoom / (float)100));
+                    }
+                    else
+                    {
+                        zoomSize = zoomOut ? 2 - ((float)currentZoom / (float)100) : ((float)currentZoom + 10) / (float)100;
+                    }
+
+                    mainDrawingCanvas.Scale(new SizeF(zoomSize, zoomSize));
+                    //mainDrawingCanvas.Size = new Size(Convert.ToInt32(mainDrawingCanvas.Width * zoomSize), Convert.ToInt32(mainDrawingCanvas.Height * zoomSize));
+
+                    txtCanvasZoom.Text = zoomOut ? currentZoom - 10 + " %" : currentZoom + 10 + " %";
+                }
+                */
             }
-        }
 
 
         private void ClearMainDrawCanvas(PictureBox elementToRemove)
@@ -261,8 +320,8 @@ namespace PCB_Drawing_Tool
             return parameters;
         }
 
-
-        public void mainDrawBox_MouseDown(object sender, MouseEventArgs e)
+        
+        public void mainDrawingCanvas_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -272,7 +331,7 @@ namespace PCB_Drawing_Tool
         }
 
 
-        public void mainDrawBox_MouseUp(object sender, MouseEventArgs e)
+        public void mainDrawingCanvas_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
@@ -299,7 +358,12 @@ namespace PCB_Drawing_Tool
         public void SelectObject(object sender, EventArgs e)
         {
             PictureBox clickedObject = sender as PictureBox;
-            clickedObject.BackColor = Color.Red;
+            if (selectedLine != null)
+            {
+                selectedLine.BackColor = Color.Black;
+            }
+            clickedObject.BackColor = ColorTranslator.FromHtml("#7f7f7f");
+            selectedLine = clickedObject;
         }
 
 
@@ -323,6 +387,14 @@ namespace PCB_Drawing_Tool
             }
         }
 
+        private void mainDrawingCanvas_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                bool zoomStatus = e.Delta < 0 ? true : false;
+                ZoomInOut(zoomStatus);
+            }
+        }
 
         private void btnUndo_Click(object sender, EventArgs e)
         {

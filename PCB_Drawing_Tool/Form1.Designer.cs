@@ -30,6 +30,7 @@
         {
             this.mainDrawingCanvas = new System.Windows.Forms.PictureBox();
             this.sidebarContainer = new System.Windows.Forms.Panel();
+            this.txtCanvasZoom = new System.Windows.Forms.TextBox();
             this.lblObjectType = new System.Windows.Forms.Label();
             this.cboObjectType = new System.Windows.Forms.ComboBox();
             this.btnUndo = new System.Windows.Forms.Button();
@@ -61,12 +62,14 @@
             this.mainDrawingCanvas.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.mainDrawingCanvas.TabIndex = 9;
             this.mainDrawingCanvas.TabStop = false;
-            this.mainDrawingCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseDown);
-            this.mainDrawingCanvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mainDrawBox_MouseUp);
+            this.mainDrawingCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseDown);
+            this.mainDrawingCanvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseUp);
+            this.mainDrawingCanvas.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseWheel);
             // 
             // sidebarContainer
             // 
             this.sidebarContainer.BackColor = System.Drawing.Color.LightGray;
+            this.sidebarContainer.Controls.Add(this.txtCanvasZoom);
             this.sidebarContainer.Controls.Add(this.lblObjectType);
             this.sidebarContainer.Controls.Add(this.cboObjectType);
             this.sidebarContainer.Controls.Add(this.btnUndo);
@@ -78,6 +81,14 @@
             this.sidebarContainer.Name = "sidebarContainer";
             this.sidebarContainer.Size = new System.Drawing.Size(179, 666);
             this.sidebarContainer.TabIndex = 0;
+            // 
+            // txtCanvasZoom
+            // 
+            this.txtCanvasZoom.Location = new System.Drawing.Point(11, 136);
+            this.txtCanvasZoom.Name = "txtCanvasZoom";
+            this.txtCanvasZoom.Size = new System.Drawing.Size(115, 20);
+            this.txtCanvasZoom.TabIndex = 14;
+            this.txtCanvasZoom.Text = "100 %";
             // 
             // lblObjectType
             // 
@@ -97,16 +108,16 @@
             "Circle (filled)",
             "Dot",
             "Transistor"});
-            this.cboObjectType.Location = new System.Drawing.Point(10, 30);
+            this.cboObjectType.Location = new System.Drawing.Point(11, 30);
             this.cboObjectType.Name = "cboObjectType";
-            this.cboObjectType.Size = new System.Drawing.Size(116, 21);
+            this.cboObjectType.Size = new System.Drawing.Size(115, 21);
             this.cboObjectType.TabIndex = 1;
             this.cboObjectType.Text = "Line";
             // 
             // btnUndo
             // 
             this.btnUndo.Enabled = false;
-            this.btnUndo.Location = new System.Drawing.Point(10, 186);
+            this.btnUndo.Location = new System.Drawing.Point(10, 242);
             this.btnUndo.Name = "btnUndo";
             this.btnUndo.Size = new System.Drawing.Size(115, 29);
             this.btnUndo.TabIndex = 5;
@@ -116,7 +127,7 @@
             // 
             // btnZoomIn
             // 
-            this.btnZoomIn.Location = new System.Drawing.Point(10, 138);
+            this.btnZoomIn.Location = new System.Drawing.Point(10, 194);
             this.btnZoomIn.Margin = new System.Windows.Forms.Padding(2);
             this.btnZoomIn.Name = "btnZoomIn";
             this.btnZoomIn.Size = new System.Drawing.Size(115, 29);
@@ -127,7 +138,7 @@
             // 
             // btnZoomOut
             // 
-            this.btnZoomOut.Location = new System.Drawing.Point(10, 105);
+            this.btnZoomOut.Location = new System.Drawing.Point(10, 161);
             this.btnZoomOut.Margin = new System.Windows.Forms.Padding(2);
             this.btnZoomOut.Name = "btnZoomOut";
             this.btnZoomOut.Size = new System.Drawing.Size(115, 29);
@@ -156,9 +167,9 @@
             "25",
             "30",
             "35"});
-            this.cboLinewidth.Location = new System.Drawing.Point(9, 69);
+            this.cboLinewidth.Location = new System.Drawing.Point(10, 69);
             this.cboLinewidth.Name = "cboLinewidth";
-            this.cboLinewidth.Size = new System.Drawing.Size(116, 21);
+            this.cboLinewidth.Size = new System.Drawing.Size(115, 21);
             this.cboLinewidth.TabIndex = 2;
             this.cboLinewidth.Text = "10";
             // 
@@ -250,7 +261,6 @@
             this.KeyPreview = true;
             this.Name = "Form1";
             this.Text = "PCB Drawing Tool";
-            this.Load += new System.EventHandler(this.ResizeCompontensToForm);
             this.Load += new System.EventHandler(this.SetAutosaveStatus);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
             this.Resize += new System.EventHandler(this.ResizeCompontensToForm);
@@ -285,6 +295,7 @@
         private System.Windows.Forms.ToolStripMenuItem mItemAutoSave;
         private System.Windows.Forms.ToolStripSeparator hToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mItemSave;
+        private System.Windows.Forms.TextBox txtCanvasZoom;
     }
 }
 
