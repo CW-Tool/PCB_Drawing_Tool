@@ -13,10 +13,10 @@ namespace PCB_Drawing_Tool
         private int angle;
 
 
-        public Line(int x1, int y1, int lineLength, int lineWidth, int lineAngle) : base(x1, y1)
+        public Line(int x1, int y1, int lineWidth, int lineLength, int lineAngle) : base(x1, y1)
         {
-            length = lineLength;
             width = lineWidth;
+            length = lineLength;
             angle = lineAngle;
         }
 
@@ -24,7 +24,7 @@ namespace PCB_Drawing_Tool
         public override string[] GetObjectParameters()
         {
             string[] baseParameters = base.GetObjectParameters();
-            string[] classParameters = new string[] { length.ToString(), width.ToString(), angle.ToString() };
+            string[] classParameters = new string[] { width.ToString(), length.ToString(), angle.ToString() };
             return baseParameters.Concat(classParameters).ToArray();
         }
 

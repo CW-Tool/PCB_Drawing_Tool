@@ -12,11 +12,16 @@ namespace PCB_Drawing_Tool
         private IntervalManager()
         {
             allTimers = new Dictionary<string, Timer>();
-            
-            Timer mouseDownTracker = new Timer();
-            mouseDownTracker.Interval = 1;
-            mouseDownTracker.Tick += MainProgram.MainForm.CreatePreviewObject;
-            allTimers["mouseDownTracker"] = mouseDownTracker;
+
+            Timer drawPreviewObject = new Timer();
+            drawPreviewObject.Interval = 1;
+            drawPreviewObject.Tick += MainProgram.MainForm.CreatePreviewObject;
+            allTimers["drawPreviewObject"] = drawPreviewObject;
+
+            Timer copyObject = new Timer();
+            copyObject.Interval = 1;
+            copyObject.Tick += MainProgram.MainForm.CopyObject;
+            allTimers["copyObject"] = copyObject;
 
             Timer autosaveCanvas = new Timer();
             autosaveCanvas.Interval = 10000;
@@ -54,6 +59,17 @@ namespace PCB_Drawing_Tool
                 allTimers[timerName].Stop();
             }
             
+        }
+
+
+        /// <summary>
+        /// Checks if a specific timer is running.
+        /// </summary>
+        /// <param name="timerName">The name of the timer which is to be checked.</param>
+        /// <returns>True = active, False = inactive.</returns>
+        public bool GetTimerStatus(string timerName)
+        {
+            return allTimers[timerName].Enabled;
         }
     }
 }

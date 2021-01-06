@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
+using System.Drawing;
 
 namespace PCB_Drawing_Tool
 {
@@ -9,6 +10,7 @@ namespace PCB_Drawing_Tool
 	{
 		private static CanvasManager singleton = null;
 		private Dictionary<CanvasObject, PictureBox> allCanvasObjects;
+		private PictureBox selectedObject;
 
 
 		private CanvasManager()
@@ -23,6 +25,12 @@ namespace PCB_Drawing_Tool
 		}
 
 
+		public PictureBox SelectedObject
+        {
+			get { return selectedObject; }
+        }
+
+
 		public static CanvasManager Singleton
         {
 			get
@@ -34,36 +42,7 @@ namespace PCB_Drawing_Tool
 				return singleton;
             }
         }
-	
 
-		public int GetSmallestObjectAspect()
-        {
-			int smallestValue = 10;
-
-			/*
-			foreach(CanvasObject element in allCanvasObjects)
-            {
-				string[] info = element.GetObjectParameters();
-            }
-
-			for (int i = 1; i <= GetCountOfCanvasObjects(); i++)
-			{
-				List<int> info = GetObjectDetails(i);
-				if (info[2] < smallestValue || info[3] < smallestValue)
-                {
-					if (info[2] < info[3])
-                    {
-						smallestValue = info[2];
-                    }
-					else
-                    {
-						smallestValue = info[3];
-                    }
-                }
-			}
-			*/
-			return smallestValue;
-        }
 
 
 		public void UpdateObject(CanvasObject objectToChange, CanvasObject newObject, PictureBox newGraphic)
@@ -104,15 +83,48 @@ namespace PCB_Drawing_Tool
 		}
 
 
+		public CanvasObject GetCanvasObject(PictureBox entryValue)
+        {
+			foreach (var element in new Dictionary<CanvasObject, PictureBox>(allCanvasObjects))
+			{
+				if (element.Value == entryValue)
+				{
+					return element.Key;
+				}
+			}
+
+			return null;
+		}
+
+
 		public int GetCountOfCanvasObjects()
 		{
 			return allCanvasObjects.Count();
 		}
 
 
-		public PictureBox GetObjectGraphic(CanvasObject objectKey)
+		public void SelectObject(object sender, MouseEventArgs e)
 		{
-			return allCanvasObjects[objectKey];
+			if (e.Button == MouseButtons.Right)
+			{
+				PictureBox clickedObject = sender as PictureBox;
+
+				if (clickedObject != selectedObject)
+				{
+					if (selectedObject != null)
+					{
+						selectedObject.BackColor = Color.Black;
+					}
+					clickedObject.BackColor = ColorTranslator.FromHtml("#7f7f7f");
+				}
+				else
+				{
+					clickedObject.BackColor = Color.Black;
+					clickedObject = null;
+				}
+
+				selectedObject = clickedObject;
+			}
 		}
 	}
 }

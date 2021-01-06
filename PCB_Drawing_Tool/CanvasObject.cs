@@ -40,7 +40,7 @@ namespace PCB_Drawing_Tool
         {
             canvasObject.MouseDown += new MouseEventHandler(MainProgram.MainForm.mainDrawingCanvas_MouseDown);
             canvasObject.MouseUp += new MouseEventHandler(MainProgram.MainForm.mainDrawingCanvas_MouseUp);
-            canvasObject.Click += new System.EventHandler(MainProgram.MainForm.SelectObject);
+            canvasObject.MouseClick += new MouseEventHandler(CanvasManager.Singleton.SelectObject);
         }
     }
 }

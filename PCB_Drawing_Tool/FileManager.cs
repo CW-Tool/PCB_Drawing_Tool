@@ -129,19 +129,7 @@ namespace PCB_Drawing_Tool
                 string objectType = rawData[0];
                 int[] data = Array.ConvertAll(rawData.Skip(1).ToArray(), int.Parse);
 
-                switch(objectType)
-                {
-                    case "Line":
-                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4]);
-                        break;
-                    case "Circle":
-                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3]);
-                        break;
-                    case "Transistor":
-                        //MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4], data[5]);
-                        break;
-                }
-
+                MainProgram.MainForm.DrawObject(objectType, data, true);
             }
             sr.Close();
         }
