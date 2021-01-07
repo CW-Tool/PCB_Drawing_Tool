@@ -108,18 +108,18 @@ namespace PCB_Drawing_Tool
             // 
             // cboObjectType
             // 
+            this.cboObjectType.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboObjectType.FormattingEnabled = true;
             this.cboObjectType.Items.AddRange(new object[] {
             "Line",
             "Circle (empty)",
             "Circle (filled)",
-            "Dot",
             "Transistor"});
             this.cboObjectType.Location = new System.Drawing.Point(13, 30);
             this.cboObjectType.Name = "cboObjectType";
             this.cboObjectType.Size = new System.Drawing.Size(150, 21);
             this.cboObjectType.TabIndex = 0;
-            this.cboObjectType.Text = "Line";
+            this.cboObjectType.SelectedIndex = 0;
             // 
             // btnUndo
             // 
@@ -168,20 +168,18 @@ namespace PCB_Drawing_Tool
             // 
             // cboLinewidth
             // 
+            this.cboLinewidth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cboLinewidth.FormattingEnabled = true;
             this.cboLinewidth.Items.AddRange(new object[] {
-            "5",
             "10",
-            "15",
             "20",
-            "25",
             "30",
-            "35"});
+            "40"});
             this.cboLinewidth.Location = new System.Drawing.Point(13, 73);
             this.cboLinewidth.Name = "cboLinewidth";
             this.cboLinewidth.Size = new System.Drawing.Size(150, 21);
             this.cboLinewidth.TabIndex = 1;
-            this.cboLinewidth.Text = "10";
+            this.cboLinewidth.SelectedIndex = 0;
             // 
             // sidebarLeft
             // 
@@ -219,6 +217,7 @@ namespace PCB_Drawing_Tool
             this.mItemSetDefLoc.Name = "mItemSetDefLoc";
             this.mItemSetDefLoc.Size = new System.Drawing.Size(660, 22);
             this.mItemSetDefLoc.Text = "Set Default Location";
+            this.mItemSetDefLoc.Click += new System.EventHandler(this.mItemSetDefLoc_Click);
             // 
             // gToolStripMenuItem
             // 
@@ -230,6 +229,7 @@ namespace PCB_Drawing_Tool
             this.mItemAutoSave.Name = "mItemAutoSave";
             this.mItemAutoSave.Size = new System.Drawing.Size(660, 22);
             this.mItemAutoSave.Text = "Enable autosave";
+            this.mItemAutoSave.Click += new System.EventHandler(this.enableAutosaveToolStripMenuItem_Click);
             // 
             // hToolStripMenuItem
             // 
@@ -241,6 +241,7 @@ namespace PCB_Drawing_Tool
             this.mItemSave.Name = "mItemSave";
             this.mItemSave.Size = new System.Drawing.Size(660, 22);
             this.mItemSave.Text = "Save";
+            this.mItemSave.Click += new System.EventHandler(this.saveToolStripMenuItem1_Click);
             // 
             // exportToolStripMenuItem
             // 

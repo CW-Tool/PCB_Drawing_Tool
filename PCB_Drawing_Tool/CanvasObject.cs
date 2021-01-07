@@ -26,9 +26,9 @@ namespace PCB_Drawing_Tool
         /// Retrieves all of the object attributes which are needed in order to be able to recreate the given CanvasObject. 
         /// </summary>
         /// <returns>An array of string values.</returns>
-        public virtual string[] GetObjectParameters()
+        public virtual int[] GetObjectParameters()
         {
-            return new string[] { coordiantes.X.ToString(), coordiantes.Y.ToString() };
+            return new int[] { coordiantes.X, coordiantes.Y };
         }
 
 

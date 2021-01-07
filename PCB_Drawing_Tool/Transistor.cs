@@ -22,10 +22,10 @@ namespace PCB_Drawing_Tool
         }
 
 
-        public override string[] GetObjectParameters()
+        public override int[] GetObjectParameters()
         {
-            string[] baseParameters = base.GetObjectParameters();
-            string[] classParameters = new string[] { length.ToString(), height.ToString(), borderWidth.ToString(), angle.ToString() };
+            int[] baseParameters = base.GetObjectParameters();
+            int[] classParameters = new int[] { length, height, borderWidth, angle };
             return baseParameters.Concat(classParameters).ToArray();
         }
 

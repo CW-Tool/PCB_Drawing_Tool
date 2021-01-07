@@ -11,11 +11,12 @@ namespace PCB_Drawing_Tool
 		private static CanvasManager singleton = null;
 		private Dictionary<CanvasObject, PictureBox> allCanvasObjects;
 		private PictureBox selectedObject;
-
+		private Dictionary<CanvasObject, PictureBox> previewObject;
 
 		private CanvasManager()
 		{
 			allCanvasObjects = new Dictionary<CanvasObject, PictureBox>();
+			previewObject = new Dictionary<CanvasObject, PictureBox>();
 		}
 
 
@@ -31,6 +32,12 @@ namespace PCB_Drawing_Tool
         }
 
 
+		public Dictionary<CanvasObject, PictureBox> PreviewObject
+        {
+			get { return previewObject; }
+			set { previewObject = value; }
+        }
+
 		public static CanvasManager Singleton
         {
 			get
@@ -42,7 +49,6 @@ namespace PCB_Drawing_Tool
 				return singleton;
             }
         }
-
 
 
 		public void UpdateObject(CanvasObject objectToChange, CanvasObject newObject, PictureBox newGraphic)
