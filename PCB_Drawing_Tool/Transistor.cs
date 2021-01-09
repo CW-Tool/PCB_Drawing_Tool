@@ -13,7 +13,7 @@ namespace PCB_Drawing_Tool
         private int angle;
 
 
-        public Transistor(int x1, int y1, int length, int height, int borderWidth, int angle) : base(x1, y1)
+        public Transistor(int x, int y, int length, int height, int borderWidth, int angle) : base(x, y)
         {
             this.length = length;
             this.height = height;

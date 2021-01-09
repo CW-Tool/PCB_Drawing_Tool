@@ -29,6 +29,7 @@ namespace PCB_Drawing_Tool
 		public PictureBox SelectedObject
         {
 			get { return selectedObject; }
+			set { selectedObject = value; }
         }
 
 
@@ -108,28 +109,33 @@ namespace PCB_Drawing_Tool
 			return allCanvasObjects.Count();
 		}
 
+		
+		public void ChangeSelectedObject(PictureBox objectToChange)
+        {
+			if (objectToChange != selectedObject)
+			{
+				if (selectedObject != null)
+				{
+					selectedObject.BackColor = Color.Black;
+				}
+				objectToChange.BackColor = ColorTranslator.FromHtml("#7f7f7f");
+			}
+			else
+			{
+				objectToChange.BackColor = Color.Black;
+				objectToChange = null;
+			}
+
+			selectedObject = objectToChange;
+		}
+
 
 		public void SelectObject(object sender, MouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Right)
 			{
 				PictureBox clickedObject = sender as PictureBox;
-
-				if (clickedObject != selectedObject)
-				{
-					if (selectedObject != null)
-					{
-						selectedObject.BackColor = Color.Black;
-					}
-					clickedObject.BackColor = ColorTranslator.FromHtml("#7f7f7f");
-				}
-				else
-				{
-					clickedObject.BackColor = Color.Black;
-					clickedObject = null;
-				}
-
-				selectedObject = clickedObject;
+				ChangeSelectedObject(clickedObject);
 			}
 		}
 	}

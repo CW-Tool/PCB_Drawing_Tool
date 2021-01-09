@@ -13,7 +13,7 @@ namespace PCB_Drawing_Tool
         private int angle;
 
 
-        public Line(int x1, int y1, int lineWidth, int lineLength, int lineAngle) : base(x1, y1)
+        public Line(int x, int y, int lineWidth, int lineLength, int lineAngle) : base(x, y)
         {
             width = lineWidth;
             length = lineLength;
@@ -43,7 +43,7 @@ namespace PCB_Drawing_Tool
             gp.AddRectangle(new Rectangle(0, 0, length, width));
             
             Matrix matrix = new Matrix();
-            matrix.RotateAt(angle, new Point(length / 2, width / 2));
+            matrix.RotateAt(angle, new Point(50, 250));
             gp.Transform(matrix);
             
             Region rg = new Region(gp);

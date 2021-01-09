@@ -18,10 +18,15 @@ namespace PCB_Drawing_Tool
             drawPreviewObject.Tick += MainProgram.MainForm.CreatePreviewObject;
             allTimers["drawPreviewObject"] = drawPreviewObject;
 
-            Timer copyObject = new Timer();
-            copyObject.Interval = 1;
-            copyObject.Tick += MainProgram.MainForm.CopyObject;
-            allTimers["copyObject"] = copyObject;
+            Timer copySelectedObject = new Timer();
+            copySelectedObject.Interval = 1;
+            copySelectedObject.Tick += MainProgram.MainForm.CopySelectedObject;
+            allTimers["copySelectedObject"] = copySelectedObject;
+
+            Timer moveSelectedObject = new Timer();
+            moveSelectedObject.Interval = 1;
+            moveSelectedObject.Tick += MainProgram.MainForm.MoveSelectedObject;
+            allTimers["moveSelectedObject"] = moveSelectedObject;
 
             Timer autosaveCanvas = new Timer();
             autosaveCanvas.Interval = 10000;

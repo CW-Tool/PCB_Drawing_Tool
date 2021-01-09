@@ -54,6 +54,8 @@ namespace PCB_Drawing_Tool
             this.headerMenu = new System.Windows.Forms.MenuStrip();
             this.mainContainer = new System.Windows.Forms.Panel();
             this.mainDrawingCanvas = new System.Windows.Forms.PictureBox();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.sidebarContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSidebar)).BeginInit();
             this.headerMenu.SuspendLayout();
@@ -64,6 +66,8 @@ namespace PCB_Drawing_Tool
             // sidebarContainer
             // 
             this.sidebarContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(16)))), ((int)(((byte)(16)))));
+            this.sidebarContainer.Controls.Add(this.button2);
+            this.sidebarContainer.Controls.Add(this.button1);
             this.sidebarContainer.Controls.Add(this.picSidebar);
             this.sidebarContainer.Controls.Add(this.txtCanvasZoom);
             this.sidebarContainer.Controls.Add(this.lblObjectType);
@@ -90,7 +94,7 @@ namespace PCB_Drawing_Tool
             // 
             // txtCanvasZoom
             // 
-            this.txtCanvasZoom.Location = new System.Drawing.Point(13, 136);
+            this.txtCanvasZoom.Location = new System.Drawing.Point(13, 249);
             this.txtCanvasZoom.Name = "txtCanvasZoom";
             this.txtCanvasZoom.Size = new System.Drawing.Size(150, 20);
             this.txtCanvasZoom.TabIndex = 2;
@@ -100,7 +104,7 @@ namespace PCB_Drawing_Tool
             // 
             this.lblObjectType.AutoSize = true;
             this.lblObjectType.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(166)))), ((int)(((byte)(166)))), ((int)(((byte)(163)))));
-            this.lblObjectType.Location = new System.Drawing.Point(53, 14);
+            this.lblObjectType.Location = new System.Drawing.Point(53, 49);
             this.lblObjectType.Name = "lblObjectType";
             this.lblObjectType.Size = new System.Drawing.Size(65, 13);
             this.lblObjectType.TabIndex = 5;
@@ -115,16 +119,15 @@ namespace PCB_Drawing_Tool
             "Circle (empty)",
             "Circle (filled)",
             "Transistor"});
-            this.cboObjectType.Location = new System.Drawing.Point(13, 30);
+            this.cboObjectType.Location = new System.Drawing.Point(13, 65);
             this.cboObjectType.Name = "cboObjectType";
             this.cboObjectType.Size = new System.Drawing.Size(150, 21);
             this.cboObjectType.TabIndex = 0;
-            this.cboObjectType.SelectedIndex = 0;
             // 
             // btnUndo
             // 
             this.btnUndo.Enabled = false;
-            this.btnUndo.Location = new System.Drawing.Point(13, 242);
+            this.btnUndo.Location = new System.Drawing.Point(13, 0);
             this.btnUndo.Name = "btnUndo";
             this.btnUndo.Size = new System.Drawing.Size(150, 29);
             this.btnUndo.TabIndex = 5;
@@ -136,7 +139,7 @@ namespace PCB_Drawing_Tool
             // 
             this.btnZoomIn.BackColor = System.Drawing.Color.Transparent;
             this.btnZoomIn.ForeColor = System.Drawing.SystemColors.ControlText;
-            this.btnZoomIn.Location = new System.Drawing.Point(13, 194);
+            this.btnZoomIn.Location = new System.Drawing.Point(13, 309);
             this.btnZoomIn.Margin = new System.Windows.Forms.Padding(2);
             this.btnZoomIn.Name = "btnZoomIn";
             this.btnZoomIn.Size = new System.Drawing.Size(150, 29);
@@ -147,7 +150,7 @@ namespace PCB_Drawing_Tool
             // 
             // btnZoomOut
             // 
-            this.btnZoomOut.Location = new System.Drawing.Point(13, 161);
+            this.btnZoomOut.Location = new System.Drawing.Point(13, 276);
             this.btnZoomOut.Margin = new System.Windows.Forms.Padding(2);
             this.btnZoomOut.Name = "btnZoomOut";
             this.btnZoomOut.Size = new System.Drawing.Size(150, 29);
@@ -160,7 +163,7 @@ namespace PCB_Drawing_Tool
             // 
             this.lblLinewidth.AutoSize = true;
             this.lblLinewidth.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(166)))), ((int)(((byte)(166)))), ((int)(((byte)(163)))));
-            this.lblLinewidth.Location = new System.Drawing.Point(62, 57);
+            this.lblLinewidth.Location = new System.Drawing.Point(62, 92);
             this.lblLinewidth.Name = "lblLinewidth";
             this.lblLinewidth.Size = new System.Drawing.Size(52, 13);
             this.lblLinewidth.TabIndex = 6;
@@ -175,11 +178,10 @@ namespace PCB_Drawing_Tool
             "20",
             "30",
             "40"});
-            this.cboLinewidth.Location = new System.Drawing.Point(13, 73);
+            this.cboLinewidth.Location = new System.Drawing.Point(13, 108);
             this.cboLinewidth.Name = "cboLinewidth";
             this.cboLinewidth.Size = new System.Drawing.Size(150, 21);
             this.cboLinewidth.TabIndex = 1;
-            this.cboLinewidth.SelectedIndex = 0;
             // 
             // sidebarLeft
             // 
@@ -295,6 +297,26 @@ namespace PCB_Drawing_Tool
             this.mainDrawingCanvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseUp);
             this.mainDrawingCanvas.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseWheel);
             // 
+            // button1
+            // 
+            this.button1.Enabled = false;
+            this.button1.Location = new System.Drawing.Point(13, 156);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(150, 29);
+            this.button1.TabIndex = 10;
+            this.button1.Text = "Delete";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Enabled = false;
+            this.button2.Location = new System.Drawing.Point(13, 191);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(150, 29);
+            this.button2.TabIndex = 11;
+            this.button2.Text = "Move All Objects";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -349,6 +371,8 @@ namespace PCB_Drawing_Tool
         private System.Windows.Forms.Panel mainContainer;
         private System.Windows.Forms.PictureBox mainDrawingCanvas;
         private System.Windows.Forms.PictureBox picSidebar;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button button1;
     }
 }
 
