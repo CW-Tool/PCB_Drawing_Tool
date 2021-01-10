@@ -17,10 +17,9 @@ namespace PCB_Drawing_Tool
 {
     public partial class Form1 : Form
     {
-        private Point startLocation;
         private CanvasManager cm;
         private FileManager fm;
-        private Size defaultCanvasSize;
+        private Point startLocation;
 
 
         public Form1()
@@ -28,12 +27,14 @@ namespace PCB_Drawing_Tool
             InitializeComponent();
             cm = CanvasManager.Singleton;
             fm = FileManager.Singleton;
+
+            // Set some default layout parameters.
             WindowState = FormWindowState.Maximized;
             cboLinewidth.SelectedIndex = 0;
             cboObjectType.SelectedIndex = 0;
-            defaultCanvasSize = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
-            mainDrawingCanvas.Size = defaultCanvasSize;
+            mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
             mainDrawingCanvas.Select();
+            
             SetDefaultFilepathValue();
         }
 
@@ -92,6 +93,12 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Checks if a newly created CanvasObject is close to the egde of the main drawing canvas.
+        /// If the object is close the canvas will be extended by a certain amount. 
+        /// </summary>
+        /// <param name="objectWidth">Width of the newly create CanvasObject.</param>
+        /// <param name="objectHeight">Height of the newly create CanvasObject.</param>
         private void ExtendCanvas(int objectWidth, int objectHeight)
         {
             int w = mainDrawingCanvas.Width;
@@ -103,9 +110,15 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Draws a new CanvasObject onto the main drawing canvas. 
+        /// </summary>
+        /// <param name="objectType">The name of the CanvasObject subclass.</param>
+        /// <param name="data">The parameters required to draw the new CanvasObject.</param>
+        /// <param name="drawPermanent">True = drawn new object permanently, False = only draw a preview.</param>
         public void DrawObject(string objectType, int[] data, bool drawPermanent)
         {
-            ClearPreviewObject();
+            ClearMainDrawCanvas(cm.ClearPreviewObject());
             CanvasObject newCanvasObject;
 
             switch (objectType)
@@ -139,16 +152,10 @@ namespace PCB_Drawing_Tool
         }
 
 
-        private void ClearPreviewObject()
-        {
-            if (cm.PreviewObject.Count != 0)
-            {
-                ClearMainDrawCanvas(cm.PreviewObject.First().Value);
-                cm.PreviewObject.Remove(cm.PreviewObject.First().Key);
-            }
-        }
-
-
+        /// <summary>
+        /// Get the current X- and Y-coordinates of the cursor.
+        /// </summary>
+        /// <returns>A point containing the coordiantes.</returns>
         private Point GetCursorPosition()
         {
             return mainDrawingCanvas.PointToClient(Cursor.Position);
@@ -246,6 +253,28 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Changes the enabled proterty of a spesific button based on certain circumstances.
+        /// </summary>
+        /// <param name="buttonName">The identifying name of the button whos to be updated.</param>
+        public void UpdateButtonStatus(string buttonName)
+        {
+            switch (buttonName)
+            {
+                case "undo":
+                    btnUndo.Enabled = cm.GetCountOfCanvasObjects() > 0 ? true : false;
+                    break;
+                case "delete":
+                    btnDelete.Enabled = cm.SelectedObject != null ? true : false;
+                    break;
+            }
+        }
+
+
+        /// <summary>
+        /// Removes a child element from the main drawing canvas.
+        /// </summary>
+        /// <param name="elementToRemove">The child element whos to be removed.</param>
         private void ClearMainDrawCanvas(PictureBox elementToRemove)
         {
             if (mainDrawingCanvas.Controls.Contains(elementToRemove))
@@ -255,6 +284,11 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Makes a copy of the selected CanvasObject, and creates a preview of the new object at the cursor location.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void CopySelectedObject(object sender, EventArgs e)
         {
             CanvasObject selectedObject = cm.GetCanvasObject(cm.SelectedObject);
@@ -268,12 +302,23 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Moves the currently selected CanvasObject by changing its location to that of the cursor. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void MoveSelectedObject(object sender, EventArgs e)
         {
             cm.SelectedObject.Location = GetCursorPosition();
         }
 
 
+        /// <summary>
+        /// Creates a preview object which shows where- and how the new object will look like. 
+        /// Gets its parameters for drawing the new object directly from the Form components.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void CreatePreviewObject(object sender, EventArgs e)
         {
             string objectType = cboObjectType.Text;
@@ -290,28 +335,43 @@ namespace PCB_Drawing_Tool
             switch (objectType)
             {
                 case "Line":
-
                     switch(DetectCursorPosition(cursorLocation))
                     {
                         case "east":
                             length = Math.Abs(cursorLocation.X - x);
                             break;
-                        case "south-east":
-                            angle = -45;
-                            length = 500;// Math.Abs(cursorLocation.X - x);
-                            width = 100;//Math.Abs(cursorLocation.Y - y);
+                        case "north-east":
+                            //Console.WriteLine(cursorLocation);
+                            angle = 45;
+                            length = Math.Abs(cursorLocation.X);
+                            width = Math.Abs(cursorLocation.Y);
                             break;
                         case "north":
                             length = penThickness;
                             width = Math.Abs(cursorLocation.Y - y);
                             y += (cursorLocation.Y - y);
                             break;
+                        case "north-west":
+                            angle = 135;
+                            length = Math.Abs(cursorLocation.X);
+                            width = Math.Abs(cursorLocation.Y);
+                            break;
                         case "west":
                             length = Math.Abs(cursorLocation.X - x);
                             x += (cursorLocation.X - x);
                             break;
+                        case "south-west":
+                            angle = 225;
+                            length = Math.Abs(cursorLocation.X - x);
+                            width = Math.Abs(cursorLocation.Y - y);
+                            break;
                         case "south":
                             length = penThickness;
+                            width = Math.Abs(cursorLocation.Y - y);
+                            break;
+                        case "south-east":
+                            angle = 315;
+                            length = Math.Abs(cursorLocation.X - x);
                             width = Math.Abs(cursorLocation.Y - y);
                             break;
                     }
@@ -321,22 +381,24 @@ namespace PCB_Drawing_Tool
 
                 case "Circle (empty)":
                 case "Circle (filled)":
-                    
                     switch (DetectCursorPosition(cursorLocation))
                     {
-                        case "east":
                         case "south-east":
+                        case "east":
                             width = cursorLocation.X - x;
                             break;
+                        case "north-east":
                         case "north":
                             width = cursorLocation.X - x;
                             y -= width;
                             break;
+                        case "north-west":
                         case "west":
                             width = x - cursorLocation.X;
                             x -= width;
                             y -= width;
                             break;
+                        case "south-west":
                         case "south":
                             width = x - cursorLocation.X;
                             x = cursorLocation.X;
@@ -357,6 +419,12 @@ namespace PCB_Drawing_Tool
             DrawObject(objectType, data, false);
         }
 
+
+        /// <summary>
+        /// Checks where the cursor is in proximity to the startLocation. 
+        /// </summary>
+        /// <param name="cursor">Current cursor location.</param>
+        /// <returns>The compass direction which the cursor is in.</returns>
         private string DetectCursorPosition(Point cursor)
         {
             string position = "";
@@ -372,13 +440,25 @@ namespace PCB_Drawing_Tool
             {
                 position = "east";
             }
+            else if (divX > lineOffset && divY < -lineOffset)
+            {
+                position = "north-east";
+            }
             else if (divX > -lineOffset && divY < -lineOffset)
             {
                 position = "north";
             }
+            else if (divX < lineOffset && divY < -lineOffset)
+            {
+               position = "north-west";
+            }
             else if (divX < -lineOffset && divY < lineOffset)
             {
                 position = "west";
+            }
+            else if (divX < -lineOffset && divY > lineOffset)
+            {
+                position = "south-west";
             }
             else if (divX < lineOffset && divY > lineOffset)
             {
@@ -388,11 +468,13 @@ namespace PCB_Drawing_Tool
             return position;
         }
 
-        
-        public void mainDrawingCanvas_MouseDown(object sender, MouseEventArgs e)
+
+        public void MouseDownEvent(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
+                // If the left mouse button is pressed while the copySelectedObject timer is active,
+                // stop the timer and draw a permanent version of the current preview object onto the canvas.
                 if (IntervalManager.Singleton.GetTimerStatus("copySelectedObject"))
                 {
                     IntervalManager.Singleton.ManageTimer("copySelectedObject", false);
@@ -400,11 +482,13 @@ namespace PCB_Drawing_Tool
                     CanvasObject objectToDraw = cm.PreviewObject.First().Key;
                     DrawObject(objectToDraw.GetType().Name, objectToDraw.GetObjectParameters(), true);
                 }
+                // If the left mouse button is pressed and there is no CanvasObject selected, start the drawPreviewObject timer.
                 else if (cm.SelectedObject == null)
                 {
                     startLocation = GetCursorPosition();
                     IntervalManager.Singleton.ManageTimer("drawPreviewObject", true);
                 }
+                // If the left mouse button is pressed and there is a CanvasObject selected, start the moveSelectedObject timer.
                 else if (cm.SelectedObject != null)
                 {
                     IntervalManager.Singleton.ManageTimer("moveSelectedObject", true);
@@ -413,25 +497,64 @@ namespace PCB_Drawing_Tool
         }
 
 
-        public void mainDrawingCanvas_MouseUp(object sender, MouseEventArgs e)
+        public void MouseUpEvent(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left) 
             {
+                // If the left mouse button is released and the drawPreviewObject timer is active, 
+                // stop it and premanently draw the last preview CanvasObject onto the canvas.
+                // Only preview object with valid parameters are being permanently drawn. 
+                // This ensures no "invisible" objects are being created. 
                 if (IntervalManager.Singleton.GetTimerStatus("drawPreviewObject"))
                 {
                     IntervalManager.Singleton.ManageTimer("drawPreviewObject", false);
                     CanvasObject previewObject = cm.PreviewObject.First().Key;
                     int[] parameters = previewObject.GetObjectParameters();
-                    DrawObject(previewObject.GetType().Name, parameters, true);
-                
-                    UpdateUndoButtonStatus();
+                    
+                    if (parameters[parameters.Length - 2] > 0)
+                    {
+                        DrawObject(previewObject.GetType().Name, parameters, true);
+                        UpdateButtonStatus("undo");
+                    }
                 }
+                // If the left mouse button is released and the moveSelectedObject timer is active, 
+                // stop it and store the new coordinates of the selected object. 
                 else if (IntervalManager.Singleton.GetTimerStatus("moveSelectedObject"))
                 {
                     IntervalManager.Singleton.ManageTimer("moveSelectedObject", false);
                     cm.ChangeSelectedObject(cm.SelectedObject);
                 }
                 
+            }
+        }
+
+
+        private void MouseWheelEvent(object sender, MouseEventArgs e)
+        {
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                bool zoomStatus = e.Delta < 0 ? true : false;
+                ZoomInOut(zoomStatus);
+            }
+        }
+
+
+        private void KeyDownEvent(object sender, KeyEventArgs e)
+        {
+            // If the Ctrl + Z keys are being pressed, trigger the "undo" function.
+            if (e.Control && e.KeyCode == Keys.Z)
+            {
+                ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
+            }
+            // If the del key is being pressed while a CanvasObject is selected, remove that object.
+            else if (e.KeyCode == Keys.Delete && cm.SelectedObject != null)
+            {
+                ClearMainDrawCanvas(cm.ClearSelectedObject());
+            }
+            // If the Ctrl + C keys are being pressed, start the copySelectedObject timer.
+            else if (e.Control && e.KeyCode == Keys.C && cm.SelectedObject != null)
+            {
+                IntervalManager.Singleton.ManageTimer("copySelectedObject", true);
             }
         }
 
@@ -448,49 +571,10 @@ namespace PCB_Drawing_Tool
         }
 
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Control && e.KeyCode == Keys.Z)
-            {
-                ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
-            }
-            else if (e.KeyCode == Keys.Delete && cm.SelectedObject != null)
-            {
-                ClearMainDrawCanvas(cm.SelectedObject);
-                cm.AllCanvasObjects.Remove(cm.GetCanvasObject(cm.SelectedObject));
-            }
-            else if (e.Control && e.KeyCode == Keys.C && cm.SelectedObject != null)
-            {
-                IntervalManager.Singleton.ManageTimer("copySelectedObject", true);
-            }
-        }
-
-        private void mainDrawingCanvas_MouseWheel(object sender, MouseEventArgs e)
-        {
-            if (Control.ModifierKeys == Keys.Control)
-            {
-                bool zoomStatus = e.Delta < 0 ? true : false;
-                ZoomInOut(zoomStatus);
-            }
-        }
-
         private void btnUndo_Click(object sender, EventArgs e)
         {
             ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
-            UpdateUndoButtonStatus();
-        }
-
-
-        private void UpdateUndoButtonStatus()
-        {
-            if (cm.GetCountOfCanvasObjects() > 0)
-            {
-                btnUndo.Enabled = true;
-            }
-            else
-            {
-                btnUndo.Enabled = false;
-            }
+            UpdateButtonStatus("undo");
         }
 
 
@@ -520,6 +604,12 @@ namespace PCB_Drawing_Tool
             }
 
             SetDefaultFilepathValue();
+        }
+
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ClearMainDrawCanvas(cm.ClearSelectedObject());
         }
     }
 }

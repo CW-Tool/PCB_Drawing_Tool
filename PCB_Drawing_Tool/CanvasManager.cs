@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using System.Drawing;
@@ -39,6 +38,7 @@ namespace PCB_Drawing_Tool
 			set { previewObject = value; }
         }
 
+
 		public static CanvasManager Singleton
         {
 			get
@@ -52,10 +52,39 @@ namespace PCB_Drawing_Tool
         }
 
 
-		public void UpdateObject(CanvasObject objectToChange, CanvasObject newObject, PictureBox newGraphic)
+		public int GetCountOfCanvasObjects()
+		{
+			return allCanvasObjects.Count();
+		}
+
+
+		/// <summary>
+		/// Registers the creation of a new CanvasObject, by storing it in the allCanvasObjects and allCanvasGraphics collections.
+		/// </summary>
+		/// <param name="newObject"></param>
+		/// <param name="newGraphic"></param>
+		public void AddObject(CanvasObject newObject, PictureBox newGraphic)
         {
-			allCanvasObjects.Remove(objectToChange);
 			allCanvasObjects.Add(newObject, newGraphic);
+		}
+
+
+		/// <summary>
+		/// Gets the reference to a stored CanvasObject from allCanvasObjects.
+		/// </summary>
+		/// <param name="entryValue">The PictureBox whos the value of the desired CanvasObject.</param>
+		/// <returns>The CanvasObject used for creating the provided PictureBox.</returns>
+		public CanvasObject GetCanvasObject(PictureBox entryValue)
+        {
+			foreach (var element in new Dictionary<CanvasObject, PictureBox>(allCanvasObjects))
+			{
+				if (element.Value == entryValue)
+				{
+					return element.Key;
+				}
+			}
+
+			return null;
 		}
 
 
@@ -80,36 +109,25 @@ namespace PCB_Drawing_Tool
 
 
 		/// <summary>
-		/// Registers the creation of a new CanvasObject, by storing it in the allCanvasObjects and allCanvasGraphics collections.
+		/// If the right mouse button is being pressed onto a PictureBox, make it the selected object.
 		/// </summary>
-		/// <param name="newObject"></param>
-		/// <param name="newGraphic"></param>
-		public void AddObject(CanvasObject newObject, PictureBox newGraphic)
-        {
-			allCanvasObjects.Add(newObject, newGraphic);
-		}
-
-
-		public CanvasObject GetCanvasObject(PictureBox entryValue)
-        {
-			foreach (var element in new Dictionary<CanvasObject, PictureBox>(allCanvasObjects))
-			{
-				if (element.Value == entryValue)
-				{
-					return element.Key;
-				}
-			}
-
-			return null;
-		}
-
-
-		public int GetCountOfCanvasObjects()
+		/// <param name="sender"></param>
+		/// <param name="e"></param>
+		public void SelectObject(object sender, MouseEventArgs e)
 		{
-			return allCanvasObjects.Count();
+			if (e.Button == MouseButtons.Right)
+			{
+				PictureBox clickedObject = sender as PictureBox;
+				ChangeSelectedObject(clickedObject);
+			}
 		}
 
-		
+
+		/// <summary>
+		/// Change the PictureBox stored in selectedObject. 
+		/// If the provided object is the same as the one stored in selectedObject, it will be replaced with a null reference.
+		/// </summary>
+		/// <param name="objectToChange">The PictureBox which is to be stored in selectedObject.</param>
 		public void ChangeSelectedObject(PictureBox objectToChange)
         {
 			if (objectToChange != selectedObject)
@@ -127,16 +145,38 @@ namespace PCB_Drawing_Tool
 			}
 
 			selectedObject = objectToChange;
+			MainProgram.MainForm.UpdateButtonStatus("delete");
 		}
 
 
-		public void SelectObject(object sender, MouseEventArgs e)
+		/// <summary>
+		/// Clears the selectedObject value.
+		/// </summary>
+		/// <returns>The PictureBox which was stored in the selectedObject.</returns>
+		public PictureBox ClearSelectedObject()
+        {
+			PictureBox pb = selectedObject;
+			ChangeSelectedObject(selectedObject);
+
+			return pb;
+		}
+
+
+		/// <summary>
+		/// Clears the previewObject value.
+		/// </summary>
+		/// <returns>The PictureBox which was stored in the previewObject.</returns>
+		public PictureBox ClearPreviewObject()
 		{
-			if (e.Button == MouseButtons.Right)
+			PictureBox pb = null;
+			
+			if (previewObject.Count != 0)
 			{
-				PictureBox clickedObject = sender as PictureBox;
-				ChangeSelectedObject(clickedObject);
+				pb = previewObject.First().Value;
+				previewObject.Remove(previewObject.First().Key);
 			}
+
+			return pb;
 		}
 	}
 }

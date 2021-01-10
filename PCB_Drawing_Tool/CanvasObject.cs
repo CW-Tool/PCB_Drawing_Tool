@@ -38,8 +38,8 @@ namespace PCB_Drawing_Tool
         /// <param name="canvasObject"></param>
         public void AddEventHandlers(PictureBox canvasObject)
         {
-            canvasObject.MouseDown += new MouseEventHandler(MainProgram.MainForm.mainDrawingCanvas_MouseDown);
-            canvasObject.MouseUp += new MouseEventHandler(MainProgram.MainForm.mainDrawingCanvas_MouseUp);
+            canvasObject.MouseDown += new MouseEventHandler(MainProgram.MainForm.MouseDownEvent);
+            canvasObject.MouseUp += new MouseEventHandler(MainProgram.MainForm.MouseUpEvent);
             canvasObject.MouseClick += new MouseEventHandler(CanvasManager.Singleton.SelectObject);
         }
     }

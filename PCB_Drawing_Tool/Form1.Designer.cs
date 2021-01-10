@@ -32,6 +32,8 @@ namespace PCB_Drawing_Tool
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.sidebarContainer = new System.Windows.Forms.Panel();
+            this.btnMoveObjects = new System.Windows.Forms.Button();
+            this.btnDelete = new System.Windows.Forms.Button();
             this.picSidebar = new System.Windows.Forms.PictureBox();
             this.txtCanvasZoom = new System.Windows.Forms.TextBox();
             this.lblObjectType = new System.Windows.Forms.Label();
@@ -54,8 +56,6 @@ namespace PCB_Drawing_Tool
             this.headerMenu = new System.Windows.Forms.MenuStrip();
             this.mainContainer = new System.Windows.Forms.Panel();
             this.mainDrawingCanvas = new System.Windows.Forms.PictureBox();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
             this.sidebarContainer.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picSidebar)).BeginInit();
             this.headerMenu.SuspendLayout();
@@ -66,8 +66,8 @@ namespace PCB_Drawing_Tool
             // sidebarContainer
             // 
             this.sidebarContainer.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(16)))), ((int)(((byte)(16)))), ((int)(((byte)(16)))));
-            this.sidebarContainer.Controls.Add(this.button2);
-            this.sidebarContainer.Controls.Add(this.button1);
+            this.sidebarContainer.Controls.Add(this.btnMoveObjects);
+            this.sidebarContainer.Controls.Add(this.btnDelete);
             this.sidebarContainer.Controls.Add(this.picSidebar);
             this.sidebarContainer.Controls.Add(this.txtCanvasZoom);
             this.sidebarContainer.Controls.Add(this.lblObjectType);
@@ -81,6 +81,25 @@ namespace PCB_Drawing_Tool
             this.sidebarContainer.Name = "sidebarContainer";
             this.sidebarContainer.Size = new System.Drawing.Size(179, 666);
             this.sidebarContainer.TabIndex = 2;
+            // 
+            // btnMoveObjects
+            // 
+            this.btnMoveObjects.Location = new System.Drawing.Point(13, 191);
+            this.btnMoveObjects.Name = "btnMoveObjects";
+            this.btnMoveObjects.Size = new System.Drawing.Size(150, 29);
+            this.btnMoveObjects.TabIndex = 11;
+            this.btnMoveObjects.Text = "Move All Objects";
+            this.btnMoveObjects.UseVisualStyleBackColor = true;
+            // 
+            // btnDelete
+            // 
+            this.btnDelete.Location = new System.Drawing.Point(13, 156);
+            this.btnDelete.Name = "btnDelete";
+            this.btnDelete.Size = new System.Drawing.Size(150, 29);
+            this.btnDelete.TabIndex = 10;
+            this.btnDelete.Text = "Delete";
+            this.btnDelete.UseVisualStyleBackColor = true;
+            this.btnDelete.Click += new System.EventHandler(this.button1_Click);
             // 
             // picSidebar
             // 
@@ -293,29 +312,9 @@ namespace PCB_Drawing_Tool
             this.mainDrawingCanvas.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.mainDrawingCanvas.TabIndex = 9;
             this.mainDrawingCanvas.TabStop = false;
-            this.mainDrawingCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseDown);
-            this.mainDrawingCanvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseUp);
-            this.mainDrawingCanvas.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.mainDrawingCanvas_MouseWheel);
-            // 
-            // button1
-            // 
-            this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(13, 156);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(150, 29);
-            this.button1.TabIndex = 10;
-            this.button1.Text = "Delete";
-            this.button1.UseVisualStyleBackColor = true;
-            // 
-            // button2
-            // 
-            this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(13, 191);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(150, 29);
-            this.button2.TabIndex = 11;
-            this.button2.Text = "Move All Objects";
-            this.button2.UseVisualStyleBackColor = true;
+            this.mainDrawingCanvas.MouseDown += new System.Windows.Forms.MouseEventHandler(this.MouseDownEvent);
+            this.mainDrawingCanvas.MouseUp += new System.Windows.Forms.MouseEventHandler(this.MouseUpEvent);
+            this.mainDrawingCanvas.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.MouseWheelEvent);
             // 
             // Form1
             // 
@@ -332,7 +331,7 @@ namespace PCB_Drawing_Tool
             this.Name = "Form1";
             this.Text = "PCB Drawing Tool";
             this.Load += new System.EventHandler(this.SetAutosaveStatus);
-            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.Form1_KeyDown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.KeyDownEvent);
             this.Resize += new System.EventHandler(this.ResizeCompontensToForm);
             this.sidebarContainer.ResumeLayout(false);
             this.sidebarContainer.PerformLayout();
@@ -371,8 +370,8 @@ namespace PCB_Drawing_Tool
         private System.Windows.Forms.Panel mainContainer;
         private System.Windows.Forms.PictureBox mainDrawingCanvas;
         private System.Windows.Forms.PictureBox picSidebar;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnMoveObjects;
+        private System.Windows.Forms.Button btnDelete;
     }
 }
 
