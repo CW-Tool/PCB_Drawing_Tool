@@ -124,7 +124,7 @@ namespace PCB_Drawing_Tool
             switch (objectType)
             {
                 case "Line":
-                    newCanvasObject = new Line(data[0], data[1], data[2], data[3], data[4]);
+                    newCanvasObject = new Line(data[0], data[1], data[2], data[3], data[4], data[5]);
                     ExtendCanvas(data[0] + data[2], data[1] + data[3]);
                     break;
                 case "Circle":
@@ -133,7 +133,7 @@ namespace PCB_Drawing_Tool
                     break;
                 default:
                     // Switch should never end up here!
-                    newCanvasObject = new Line(0, 0, 0, 0, 0);
+                    newCanvasObject = new Line(0, 0, 0, 0, 0, 0);
                     break;
             }
 
@@ -341,10 +341,10 @@ namespace PCB_Drawing_Tool
                             length = Math.Abs(cursorLocation.X - x);
                             break;
                         case "north-east":
-                            //Console.WriteLine(cursorLocation);
-                            angle = 45;
-                            length = Math.Abs(cursorLocation.X);
-                            width = Math.Abs(cursorLocation.Y);
+                            angle = 90;
+                            length = Math.Abs(x - cursorLocation.X);
+                            width = Math.Abs(y - cursorLocation.Y);
+                            y = Math.Abs(cursorLocation.Y);
                             break;
                         case "north":
                             length = penThickness;
@@ -352,31 +352,34 @@ namespace PCB_Drawing_Tool
                             y += (cursorLocation.Y - y);
                             break;
                         case "north-west":
-                            angle = 135;
-                            length = Math.Abs(cursorLocation.X);
-                            width = Math.Abs(cursorLocation.Y);
+                            angle = 180;
+                            length = Math.Abs(cursorLocation.X - x);
+                            width = Math.Abs(cursorLocation.Y - y);
+                            x = Math.Abs(cursorLocation.X);
+                            y = Math.Abs(cursorLocation.Y);
                             break;
                         case "west":
                             length = Math.Abs(cursorLocation.X - x);
                             x += (cursorLocation.X - x);
                             break;
                         case "south-west":
-                            angle = 225;
-                            length = Math.Abs(cursorLocation.X - x);
-                            width = Math.Abs(cursorLocation.Y - y);
+                            angle = 270;
+                            length = Math.Abs(x - cursorLocation.X);
+                            width = Math.Abs(y - cursorLocation.Y);
+                            x = Math.Abs(cursorLocation.X);
                             break;
                         case "south":
                             length = penThickness;
                             width = Math.Abs(cursorLocation.Y - y);
                             break;
                         case "south-east":
-                            angle = 315;
+                            angle = 360;
                             length = Math.Abs(cursorLocation.X - x);
                             width = Math.Abs(cursorLocation.Y - y);
                             break;
                     }
                         
-                    data = new int[] { x, y, width, length, angle };
+                    data = new int[] { x, y, width, length, angle, penThickness };
                     break;
 
                 case "Circle (empty)":
@@ -469,6 +472,25 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Checks if a set with CanvasObject parameters is valid, to ensures no "invisible" objects are being created. 
+        /// </summary>
+        /// <param name="objectData">The array with parameters.</param>
+        /// <returns>True = all parameters are valid, False = some parameters will lead to an "invisible" object.</returns>
+        private bool CheckForInvisibleObject(int[] objectData)
+        {
+            switch(objectData.Length)
+            {
+                case 4:
+                    return objectData[2] > 0 ? true : false;
+                case 6:
+                    return objectData[3] > 0 ? true : false;
+                default:
+                    return true;
+            }
+        }
+
+
         public void MouseDownEvent(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -504,14 +526,13 @@ namespace PCB_Drawing_Tool
                 // If the left mouse button is released and the drawPreviewObject timer is active, 
                 // stop it and premanently draw the last preview CanvasObject onto the canvas.
                 // Only preview object with valid parameters are being permanently drawn. 
-                // This ensures no "invisible" objects are being created. 
                 if (IntervalManager.Singleton.GetTimerStatus("drawPreviewObject"))
                 {
                     IntervalManager.Singleton.ManageTimer("drawPreviewObject", false);
                     CanvasObject previewObject = cm.PreviewObject.First().Key;
                     int[] parameters = previewObject.GetObjectParameters();
                     
-                    if (parameters[parameters.Length - 2] > 0)
+                    if (CheckForInvisibleObject(parameters))
                     {
                         DrawObject(previewObject.GetType().Name, parameters, true);
                         UpdateButtonStatus("undo");

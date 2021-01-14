@@ -12,20 +12,22 @@ namespace PCB_Drawing_Tool
         private int length;
         private int width;
         private int angle;
+        private int thickness;
 
 
-        public Line(int x, int y, int lineWidth, int lineLength, int lineAngle) : base(x, y)
+        public Line(int x, int y, int width, int length, int angle, int thickness) : base(x, y)
         {
-            width = lineWidth;
-            length = lineLength;
-            angle = lineAngle;
+            this.width = width;
+            this.length = length;
+            this.angle = angle;
+            this.thickness = thickness;
         }
 
 
         public override int[] GetObjectParameters()
         {
             int[] baseParameters = base.GetObjectParameters();
-            int[] classParameters = new int[] { width, length, angle };
+            int[] classParameters = new int[] { width, length, angle, thickness };
             return baseParameters.Concat(classParameters).ToArray();
         }
 
@@ -42,83 +44,31 @@ namespace PCB_Drawing_Tool
 
             GraphicsPath gp = new GraphicsPath();
 
+            // Check if the line whos to be drawn is straight or diagonal, and act accordingly.
             if (angle != 0)
             {
-                List<Point> points = GetPolygonPoints(angle);
-
                 gp.AddPolygon(new Point[]
                 {
-                    points[0],
-                    points[1],
-                    points[2],
-                    points[3]
+                    new Point(0, thickness - 3),
+                    new Point(thickness - 3, 0),
+                    new Point(length - 3, length - thickness),
+                    new Point(length - thickness, length - 3)
                 });
+
+                Matrix matrix = new Matrix();
+                matrix.RotateAt(angle, new Point(length / 2, width / 2));
+                gp.Transform(matrix);
             }
             else
             {
                 gp.AddRectangle(new Rectangle(0, 0, length, width));
             }
-            
-            
+           
             Region rg = new Region(gp);
             graphicObject.Region = rg;
 
             AddEventHandlers(graphicObject);
             return graphicObject;
-        }
-
-
-        private List<Point> GetPolygonPoints(int angle)
-        {
-            List<Point> points;
-
-            switch(angle)
-            {
-                case 45:
-                    //Console.WriteLine(length + " " + width + " " + coordiantes.X + " " + coordiantes.Y);
-                    
-                    points = new List<Point>
-                    {
-                        new Point(0, 7),
-                        new Point(7, 0),
-                        new Point(width, width - 7),
-                        new Point(width - 7, width)
-                    };
-                    break;
-                case 135:
-                    points = new List<Point>
-                    {
-                        new Point(0, 7),
-                        new Point(7, 0),
-                        new Point(400, 393),
-                        new Point(393, 400)
-                    };
-                    break;
-                case 225:
-                    points = new List<Point>
-                    {
-                        new Point(0, 7),
-                        new Point(7, 0),
-                        new Point(400, 393),
-                        new Point(393, 400)
-                    };
-                    break;
-                case 315:
-                    //Console.WriteLine(length + " " + width + " " + coordiantes.X + " " + coordiantes.Y);
-                    points = new List<Point>
-                    {
-                        new Point(0, 7),
-                        new Point(7, 0),
-                        new Point(length, length - 7),
-                        new Point(length - 7, length)
-                    };
-                    break;
-                default:
-                    points = new List<Point>();
-                    break;
-            }
-
-            return points;
         }
     }
 }
