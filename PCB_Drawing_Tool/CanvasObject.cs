@@ -7,20 +7,11 @@ namespace PCB_Drawing_Tool
     {
         protected Point coordiantes;
         protected Color backgroundColor;
-        private int id;
 
-
-        public int Id
-        {
-            get { return id; }
-        }
-
-
-        public CanvasObject (int x1, int y1, int id)
+        public CanvasObject (int x1, int y1)
         {
             coordiantes = new Point(x1, y1);
             backgroundColor = Color.Black;
-            this.id = id;
         }
 
 
@@ -35,9 +26,9 @@ namespace PCB_Drawing_Tool
         /// Retrieves all of the object attributes which are needed in order to be able to recreate the given CanvasObject. 
         /// </summary>
         /// <returns>An array of string values.</returns>
-        public virtual string[] GetObjectParameters()
+        public virtual int[] GetObjectParameters()
         {
-            return new string[] { coordiantes.X.ToString(), coordiantes.Y.ToString() };
+            return new int[] { coordiantes.X, coordiantes.Y };
         }
 
 
@@ -47,9 +38,9 @@ namespace PCB_Drawing_Tool
         /// <param name="canvasObject"></param>
         public void AddEventHandlers(PictureBox canvasObject)
         {
-            canvasObject.MouseDown += new MouseEventHandler(MainProgram.MainForm.mainDrawBox_MouseDown);
-            canvasObject.MouseUp += new MouseEventHandler(MainProgram.MainForm.mainDrawBox_MouseUp);
-            canvasObject.Click += new System.EventHandler(MainProgram.MainForm.SelectObject);
+            canvasObject.MouseDown += new MouseEventHandler(MainProgram.MainForm.MouseDownEvent);
+            canvasObject.MouseUp += new MouseEventHandler(MainProgram.MainForm.MouseUpEvent);
+            canvasObject.MouseClick += new MouseEventHandler(CanvasManager.Singleton.SelectObject);
         }
     }
 }

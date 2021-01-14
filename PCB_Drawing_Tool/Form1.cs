@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -16,14 +17,24 @@ namespace PCB_Drawing_Tool
 {
     public partial class Form1 : Form
     {
+        private CanvasManager cm;
+        private FileManager fm;
         private Point startLocation;
-        private PictureBox previewObject;
 
 
         public Form1()
         {
             InitializeComponent();
+            cm = CanvasManager.Singleton;
+            fm = FileManager.Singleton;
+
+            // Set some default layout parameters.
+            WindowState = FormWindowState.Maximized;
+            cboLinewidth.SelectedIndex = 0;
+            cboObjectType.SelectedIndex = 0;
             mainDrawingCanvas.Size = new Size(Screen.FromControl(this).Bounds.Width, Screen.FromControl(this).Bounds.Height);
+            mainDrawingCanvas.Select();
+            
             SetDefaultFilepathValue();
         }
 
@@ -36,10 +47,12 @@ namespace PCB_Drawing_Tool
         private void ResizeCompontensToForm(object sender, EventArgs e)
         {
             Control window = sender as Control;
-            mainContainer.Size = new Size(window.Width - 150, window.Height - 50);
-            mainContainer.Location = new Point(0, 25);
-            sidebarContainer.Size = new Size(140, window.Height - 60);
-            sidebarContainer.Location = new Point(window.Width - 149, 23);
+            mainContainer.Size = new Size(window.Width - 193, window.Height - 63);
+            mainContainer.Location = new Point(4, 24);
+            sidebarContainer.Size = new Size(180, window.Height - 60);
+            sidebarContainer.Location = new Point(window.Width - 190, 23);
+            picSidebar.Location = new Point(10, sidebarContainer.Height - 235);
+            sidebarLeft.Size = new Size(5, window.Height);
         }
 
 
@@ -48,7 +61,7 @@ namespace PCB_Drawing_Tool
         /// </summary>
         private void SetDefaultFilepathValue()
         {
-            string defaultFilepath = FileManager.Singleton.ReadConfigFile()[0];
+            string defaultFilepath = fm.ReadConfigFile()[0];
             mItemDefLoc.Text = defaultFilepath != "" ? defaultFilepath : "Not Defined Jet";
         }
 
@@ -60,7 +73,7 @@ namespace PCB_Drawing_Tool
         /// <param name="e"></param>
         private void SetAutosaveStatus(object sender, EventArgs e)
         {
-            string autosaveStatus = FileManager.Singleton.ReadConfigFile()[1];
+            string autosaveStatus = fm.ReadConfigFile()[1];
             if (autosaveStatus == "true")
             {
                 ToggleAutosave();
@@ -73,37 +86,76 @@ namespace PCB_Drawing_Tool
         /// </summary>
         private void ToggleAutosave()
         {
-            if (!mItemAutoSave.Checked)
+            IntervalManager.Singleton.ManageTimer("autosaveCanvas", !mItemAutoSave.Checked);
+            string result = !mItemAutoSave.Checked ? "true" : "false";
+            fm.SaveDefaultConfig(result);
+            mItemAutoSave.Checked = !mItemAutoSave.Checked;
+        }
+
+
+        /// <summary>
+        /// Checks if a newly created CanvasObject is close to the egde of the main drawing canvas.
+        /// If the object is close the canvas will be extended by a certain amount. 
+        /// </summary>
+        /// <param name="objectWidth">Width of the newly create CanvasObject.</param>
+        /// <param name="objectHeight">Height of the newly create CanvasObject.</param>
+        private void ExtendCanvas(int objectWidth, int objectHeight)
+        {
+            int w = mainDrawingCanvas.Width;
+            int h = mainDrawingCanvas.Height;
+            if ((w - objectWidth) < 100 || (h - objectHeight) < 100 || (w - objectHeight) < 100 || (h - objectWidth) < 100)
             {
-                IntervalManager.Singleton.ManageTimer("autosaveCanvas", true);
-                FileManager.Singleton.SaveDefaultConfig("true");
-                mItemAutoSave.Checked = true;
+                mainDrawingCanvas.Size = new Size(mainDrawingCanvas.Width + 100, mainDrawingCanvas.Height + 100);
+            }
+        }
+
+
+        /// <summary>
+        /// Draws a new CanvasObject onto the main drawing canvas. 
+        /// </summary>
+        /// <param name="objectType">The name of the CanvasObject subclass.</param>
+        /// <param name="data">The parameters required to draw the new CanvasObject.</param>
+        /// <param name="drawPermanent">True = drawn new object permanently, False = only draw a preview.</param>
+        public void DrawObject(string objectType, int[] data, bool drawPermanent)
+        {
+            ClearMainDrawCanvas(cm.ClearPreviewObject());
+            CanvasObject newCanvasObject;
+
+            switch (objectType)
+            {
+                case "Line":
+                    newCanvasObject = new Line(data[0], data[1], data[2], data[3], data[4], data[5]);
+                    ExtendCanvas(data[0] + data[2], data[1] + data[3]);
+                    break;
+                case "Circle":
+                    newCanvasObject = new Circle(data[0], data[1], data[2], data[3]);
+                    ExtendCanvas(data[0] + data[2], data[1] + data[2]);
+                    break;
+                default:
+                    // Switch should never end up here!
+                    newCanvasObject = new Line(0, 0, 0, 0, 0, 0);
+                    break;
+            }
+
+            PictureBox newPicBox = newCanvasObject.CreateCanvasObject();
+
+            if (drawPermanent)
+            {
+                cm.AddObject(newCanvasObject, newPicBox);
             }
             else
             {
-                IntervalManager.Singleton.ManageTimer("autosaveCanvas", false);
-                FileManager.Singleton.SaveDefaultConfig("false");
-                mItemAutoSave.Checked = false;
+                cm.PreviewObject = new Dictionary<CanvasObject, PictureBox>() { { newCanvasObject, newPicBox } };
             }
+
+            mainDrawingCanvas.Controls.Add(newPicBox);
         }
 
 
-        // This overloaded method creates a line.
-        public void DrawObject(int x1, int y1, int lineLength, int lineWidth, int lineAngle)
-        {        
-            int objectID = new Line(x1, y1, lineLength, lineWidth, lineAngle).Id;
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
-        }
-
-
-        // This overloaded method creates a circle (filled/empty)
-        public void DrawObject(int x1, int y1, int diameter, int borderWidth)
-        {
-            int objectID = new Circle(x1, y1, diameter, borderWidth).Id;
-            mainDrawingCanvas.Controls.Add(CanvasManager.Singleton.GetCanvasGraphic(objectID));
-        }
-
-
+        /// <summary>
+        /// Get the current X- and Y-coordinates of the cursor.
+        /// </summary>
+        /// <returns>A point containing the coordiantes.</returns>
         private Point GetCursorPosition()
         {
             return mainDrawingCanvas.PointToClient(Cursor.Position);
@@ -113,13 +165,53 @@ namespace PCB_Drawing_Tool
         private void ZoomInOut(bool zoomOut)
         {
             /*
+            string rawString = txtCanvasZoom.Text;
+            int currentZoom = Convert.ToInt32(rawString.Substring(0, rawString.Length - 2));
+
+
             int zoomSize = 10;
-          
+
             if (zoomOut)
             {
                 zoomSize *= -1;
             }
 
+            mainDrawingCanvas.Controls.Clear();
+
+            Dictionary<CanvasObject, PictureBox> tmpAllCanvasObjects = new Dictionary<CanvasObject, PictureBox>(cm.AllCanvasObjects);
+
+            foreach (var element in tmpAllCanvasObjects)
+            {
+                
+                int[] data = element.Key.GetObjectParameters();
+
+                //Only for lines
+                data[0] += zoomSize;
+                data[1] += zoomSize;
+                data[2] += zoomSize;
+                data[3] += zoomSize;
+
+                DrawObject(element.Key.GetType().Name, data, true);
+
+                switch (element.Key.GetType().Name)
+                {
+                    case "Line":
+
+                        break;
+                    case "Circle":
+
+                        break;
+                    case "Transistor":
+                        //Transistor newTransistor = new Transistor(data[0], data[1], data[2], data[3], data[4], data[5]);
+                        break;
+                }
+
+                cm.AllCanvasObjects.Remove(element.Key);
+            }
+
+
+
+            /*
             if (CanvasManager.Singleton.GetSmallestObjectAspect() + zoomSize > 0)
             {
                 mainDrawingCanvas.Controls.Clear();
@@ -127,22 +219,62 @@ namespace PCB_Drawing_Tool
                 for (int i = 1; i <= numberOfLines; i++)
                 {
                     List<int> info = CanvasManager.Singleton.GetObjectDetails(i);
-                    CanvasManager.Singleton.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
+                    cm.UpdateObject(i, DrawObject(info[0], info[1], info[2] + zoomSize, info[3] + zoomSize, info[4]));
                 }
 
                 for (int i = 0; i < cboLinewidth.Items.Count; i++)
                 {
                     cboLinewidth.Items[i] = (Convert.ToInt32(cboLinewidth.Items[i]) + zoomSize).ToString();
-                } 
-            }   
-            else
-            {
-                MessageBox.Show("Can't Zoom out anymore!");
-            }
-            */
+                }
+
+
+                /*
+                if ((zoomOut && currentZoom != 10) || (!zoomOut && currentZoom != 190))
+                {
+                    //mainDrawingCanvas.Scale(new SizeF(1 + ((float)(100 - currentZoom) / (float)100), 1 + ((float)(100 - currentZoom) / (float)100)));
+
+                    float zoomSize;
+
+                    if (zoomOut && currentZoom <= 100 || !zoomOut && currentZoom < 100)
+                    {
+                        zoomSize = zoomOut ? ((float)currentZoom - 10) / (float)100 : 1 + (1 - ((float)currentZoom / (float)100));
+                    }
+                    else
+                    {
+                        zoomSize = zoomOut ? 2 - ((float)currentZoom / (float)100) : ((float)currentZoom + 10) / (float)100;
+                    }
+
+                    mainDrawingCanvas.Scale(new SizeF(zoomSize, zoomSize));
+                    //mainDrawingCanvas.Size = new Size(Convert.ToInt32(mainDrawingCanvas.Width * zoomSize), Convert.ToInt32(mainDrawingCanvas.Height * zoomSize));
+
+                    txtCanvasZoom.Text = zoomOut ? currentZoom - 10 + " %" : currentZoom + 10 + " %";
+                }
+                */
         }
 
 
+        /// <summary>
+        /// Changes the enabled proterty of a spesific button based on certain circumstances.
+        /// </summary>
+        /// <param name="buttonName">The identifying name of the button whos to be updated.</param>
+        public void UpdateButtonStatus(string buttonName)
+        {
+            switch (buttonName)
+            {
+                case "undo":
+                    btnUndo.Enabled = cm.GetCountOfCanvasObjects() > 0 ? true : false;
+                    break;
+                case "delete":
+                    btnDelete.Enabled = cm.SelectedObject != null ? true : false;
+                    break;
+            }
+        }
+
+
+        /// <summary>
+        /// Removes a child element from the main drawing canvas.
+        /// </summary>
+        /// <param name="elementToRemove">The child element whos to be removed.</param>
         private void ClearMainDrawCanvas(PictureBox elementToRemove)
         {
             if (mainDrawingCanvas.Controls.Contains(elementToRemove))
@@ -152,137 +284,299 @@ namespace PCB_Drawing_Tool
         }
 
 
+        /// <summary>
+        /// Makes a copy of the selected CanvasObject, and creates a preview of the new object at the cursor location.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void CopySelectedObject(object sender, EventArgs e)
+        {
+            CanvasObject selectedObject = cm.GetCanvasObject(cm.SelectedObject);
+            int[] data = selectedObject.GetObjectParameters();
+
+            Point location = GetCursorPosition();
+            data[0] = location.X;
+            data[1] = location.Y;
+
+            DrawObject(selectedObject.GetType().Name, data, false);
+        }
+
+
+        /// <summary>
+        /// Moves the currently selected CanvasObject by changing its location to that of the cursor. 
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        public void MoveSelectedObject(object sender, EventArgs e)
+        {
+            cm.SelectedObject.Location = GetCursorPosition();
+        }
+
+
+        /// <summary>
+        /// Creates a preview object which shows where- and how the new object will look like. 
+        /// Gets its parameters for drawing the new object directly from the Form components.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public void CreatePreviewObject(object sender, EventArgs e)
         {
-            ClearMainDrawCanvas(previewObject);
+            string objectType = cboObjectType.Text;
+            int[] data;
 
             Point cursorLocation = GetCursorPosition();
             int penThickness = Int16.Parse(cboLinewidth.Text);
-            int x1 = startLocation.X;
-            int y1 = startLocation.Y;
-            int lineLength = 0;
-            int lineWidth = penThickness;
-            int lineAngle = 0;
-            int lineOffset = 30;
+            int x = startLocation.X;
+            int y = startLocation.Y;
+            int length = 0;
+            int width = penThickness;
+            int angle = 0;
 
-            // East-line
-            if ((cursorLocation.X - x1) > lineOffset && (cursorLocation.Y - y1) > -lineOffset)
-            {
-                lineLength = Math.Abs(cursorLocation.X - x1);
-            }
-
-            // South/East-diagonal
-            if ((cursorLocation.X - x1) > lineOffset && (cursorLocation.Y - y1) > lineOffset)
-            {
-                lineAngle = -45;
-                lineLength = Math.Abs(cursorLocation.X - x1);
-                lineWidth = Math.Abs(cursorLocation.Y - y1);
-            }
-
-            // North-line
-            else if ((cursorLocation.X - x1) > -lineOffset && (cursorLocation.Y - y1) < -lineOffset)
-            {
-                lineLength = penThickness;
-                lineWidth = Math.Abs(cursorLocation.Y - y1) + 12;
-                y1 += (cursorLocation.Y - y1);
-            }
-
-            // West-line
-            else if ((cursorLocation.X - x1) < -lineOffset && (cursorLocation.Y - y1) < lineOffset)
-            {
-                lineLength = Math.Abs(cursorLocation.X - x1) + 12;
-                x1 += (cursorLocation.X - x1);
-            }
-
-            // South-line
-            else if ((cursorLocation.X - x1) < lineOffset && (cursorLocation.Y - y1) > lineOffset)
-            {
-                lineLength = penThickness;
-                lineWidth = Math.Abs(cursorLocation.Y - y1);
-            }
-
-            previewObject = new PictureBox
-            {
-                Location = new Point(x1, y1),
-                BackColor = Color.Black,
-                Width = lineLength,
-                Height = lineWidth,
-                Name = lineAngle.ToString()
-            };
-
-
-            GraphicsPath gp = new GraphicsPath();
-            gp.AddRectangle(new Rectangle(0, 0, lineLength, lineWidth));
-            Matrix matrix = new Matrix();
-            matrix.RotateAt(lineAngle, new Point(lineLength/2, lineWidth/2));
-            gp.Transform(matrix);
-            Region rg = new Region(gp);
-            previewObject.Region = rg;
-            mainDrawingCanvas.Controls.Add(previewObject);
-        }
-
-
-        private List<int> GetObjectParameters()
-        {
-            List<int> parameters = new List<int>();
-            switch(cboObjectType.Text)
+            switch (objectType)
             {
                 case "Line":
-                    parameters.Add(previewObject.Location.X);
-                    parameters.Add(previewObject.Location.Y);
-                    parameters.Add(previewObject.Width);
-                    parameters.Add(previewObject.Height);
-                    parameters.Add(Convert.ToInt32(previewObject.Name));
+                    switch(DetectCursorPosition(cursorLocation))
+                    {
+                        case "east":
+                            length = Math.Abs(cursorLocation.X - x);
+                            break;
+                        case "north-east":
+                            angle = 90;
+                            length = Math.Abs(x - cursorLocation.X);
+                            width = Math.Abs(y - cursorLocation.Y);
+                            y = Math.Abs(cursorLocation.Y);
+                            break;
+                        case "north":
+                            length = penThickness;
+                            width = Math.Abs(cursorLocation.Y - y);
+                            y += (cursorLocation.Y - y);
+                            break;
+                        case "north-west":
+                            angle = 180;
+                            length = Math.Abs(cursorLocation.X - x);
+                            width = Math.Abs(cursorLocation.Y - y);
+                            x = Math.Abs(cursorLocation.X);
+                            y = Math.Abs(cursorLocation.Y);
+                            break;
+                        case "west":
+                            length = Math.Abs(cursorLocation.X - x);
+                            x += (cursorLocation.X - x);
+                            break;
+                        case "south-west":
+                            angle = 270;
+                            length = Math.Abs(x - cursorLocation.X);
+                            width = Math.Abs(y - cursorLocation.Y);
+                            x = Math.Abs(cursorLocation.X);
+                            break;
+                        case "south":
+                            length = penThickness;
+                            width = Math.Abs(cursorLocation.Y - y);
+                            break;
+                        case "south-east":
+                            angle = 360;
+                            length = Math.Abs(cursorLocation.X - x);
+                            width = Math.Abs(cursorLocation.Y - y);
+                            break;
+                    }
+                        
+                    data = new int[] { x, y, width, length, angle, penThickness };
                     break;
+
                 case "Circle (empty)":
                 case "Circle (filled)":
-                    parameters.Add(previewObject.Location.X);
-                    parameters.Add(previewObject.Location.Y);
-                    parameters.Add(previewObject.Width);
+                    switch (DetectCursorPosition(cursorLocation))
+                    {
+                        case "south-east":
+                        case "east":
+                            width = cursorLocation.X - x;
+                            break;
+                        case "north-east":
+                        case "north":
+                            width = cursorLocation.X - x;
+                            y -= width;
+                            break;
+                        case "north-west":
+                        case "west":
+                            width = x - cursorLocation.X;
+                            x -= width;
+                            y -= width;
+                            break;
+                        case "south-west":
+                        case "south":
+                            width = x - cursorLocation.X;
+                            x = cursorLocation.X;
+                            break;
+                    }
+
+                    int borderWidth = objectType == "Circle (empty)" ? penThickness : 0;
+                    data = new int[] { x, y, width, borderWidth };
+                    objectType = "Circle";
                     break;
+
+                default:
+                    // Switch should never end up here!
+                    data = new int[0];
+                break;
             }
-            return parameters;
+
+            DrawObject(objectType, data, false);
         }
 
 
-        public void mainDrawBox_MouseDown(object sender, MouseEventArgs e)
+        /// <summary>
+        /// Checks where the cursor is in proximity to the startLocation. 
+        /// </summary>
+        /// <param name="cursor">Current cursor location.</param>
+        /// <returns>The compass direction which the cursor is in.</returns>
+        private string DetectCursorPosition(Point cursor)
         {
-            if (e.Button == MouseButtons.Left)
+            string position = "";
+            int divX = cursor.X - startLocation.X;
+            int divY = cursor.Y - startLocation.Y;
+            int lineOffset = 40;
+
+            if (divX > lineOffset && divY > lineOffset)
             {
-                startLocation = GetCursorPosition();
-                IntervalManager.Singleton.ManageTimer("mouseDownTracker", true);
+                position = "south-east";
+            } 
+            else if (divX > lineOffset && divY > -lineOffset)
+            {
+                position = "east";
+            }
+            else if (divX > lineOffset && divY < -lineOffset)
+            {
+                position = "north-east";
+            }
+            else if (divX > -lineOffset && divY < -lineOffset)
+            {
+                position = "north";
+            }
+            else if (divX < lineOffset && divY < -lineOffset)
+            {
+               position = "north-west";
+            }
+            else if (divX < -lineOffset && divY < lineOffset)
+            {
+                position = "west";
+            }
+            else if (divX < -lineOffset && divY > lineOffset)
+            {
+                position = "south-west";
+            }
+            else if (divX < lineOffset && divY > lineOffset)
+            {
+                position = "south";
+            }
+
+            return position;
+        }
+
+
+        /// <summary>
+        /// Checks if a set with CanvasObject parameters is valid, to ensures no "invisible" objects are being created. 
+        /// </summary>
+        /// <param name="objectData">The array with parameters.</param>
+        /// <returns>True = all parameters are valid, False = some parameters will lead to an "invisible" object.</returns>
+        private bool CheckForInvisibleObject(int[] objectData)
+        {
+            switch(objectData.Length)
+            {
+                case 4:
+                    return objectData[2] > 0 ? true : false;
+                case 6:
+                    return objectData[3] > 0 ? true : false;
+                default:
+                    return true;
             }
         }
 
 
-        public void mainDrawBox_MouseUp(object sender, MouseEventArgs e)
+        public void MouseDownEvent(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
             {
-                IntervalManager.Singleton.ManageTimer("mouseDownTracker", false);
-
-                List<int> parameters = GetObjectParameters();
-                switch (parameters.Count)
+                // If the left mouse button is pressed while the copySelectedObject timer is active,
+                // stop the timer and draw a permanent version of the current preview object onto the canvas.
+                if (IntervalManager.Singleton.GetTimerStatus("copySelectedObject"))
                 {
-                    case 3:
-                        int borderWidth = cboObjectType.Text == "Circle (empty)" ? Convert.ToInt32(cboLinewidth.Text) : 0;
-                        DrawObject(parameters[0], parameters[1], parameters[2], borderWidth);
-                        break;
-                    case 5:
-                        DrawObject(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4]);
-                        break;
+                    IntervalManager.Singleton.ManageTimer("copySelectedObject", false);
+
+                    CanvasObject objectToDraw = cm.PreviewObject.First().Key;
+                    DrawObject(objectToDraw.GetType().Name, objectToDraw.GetObjectParameters(), true);
+                }
+                // If the left mouse button is pressed and there is no CanvasObject selected, start the drawPreviewObject timer.
+                else if (cm.SelectedObject == null)
+                {
+                    startLocation = GetCursorPosition();
+                    IntervalManager.Singleton.ManageTimer("drawPreviewObject", true);
+                }
+                // If the left mouse button is pressed and there is a CanvasObject selected, start the moveSelectedObject timer.
+                else if (cm.SelectedObject != null)
+                {
+                    IntervalManager.Singleton.ManageTimer("moveSelectedObject", true);
+                }
+            }
+        }
+
+
+        public void MouseUpEvent(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left) 
+            {
+                // If the left mouse button is released and the drawPreviewObject timer is active, 
+                // stop it and premanently draw the last preview CanvasObject onto the canvas.
+                // Only preview object with valid parameters are being permanently drawn. 
+                if (IntervalManager.Singleton.GetTimerStatus("drawPreviewObject"))
+                {
+                    IntervalManager.Singleton.ManageTimer("drawPreviewObject", false);
+                    CanvasObject previewObject = cm.PreviewObject.First().Key;
+                    int[] parameters = previewObject.GetObjectParameters();
+                    
+                    if (CheckForInvisibleObject(parameters))
+                    {
+                        DrawObject(previewObject.GetType().Name, parameters, true);
+                        UpdateButtonStatus("undo");
+                    }
+                }
+                // If the left mouse button is released and the moveSelectedObject timer is active, 
+                // stop it and store the new coordinates of the selected object. 
+                else if (IntervalManager.Singleton.GetTimerStatus("moveSelectedObject"))
+                {
+                    IntervalManager.Singleton.ManageTimer("moveSelectedObject", false);
+                    cm.ChangeSelectedObject(cm.SelectedObject);
                 }
                 
-                ClearMainDrawCanvas(previewObject);
-                UpdateUndoButtonStatus();
             }
         }
 
 
-        public void SelectObject(object sender, EventArgs e)
+        private void MouseWheelEvent(object sender, MouseEventArgs e)
         {
-            PictureBox clickedObject = sender as PictureBox;
-            clickedObject.BackColor = Color.Red;
+            if (Control.ModifierKeys == Keys.Control)
+            {
+                bool zoomStatus = e.Delta < 0 ? true : false;
+                ZoomInOut(zoomStatus);
+            }
+        }
+
+
+        private void KeyDownEvent(object sender, KeyEventArgs e)
+        {
+            // If the Ctrl + Z keys are being pressed, trigger the "undo" function.
+            if (e.Control && e.KeyCode == Keys.Z)
+            {
+                ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
+            }
+            // If the del key is being pressed while a CanvasObject is selected, remove that object.
+            else if (e.KeyCode == Keys.Delete && cm.SelectedObject != null)
+            {
+                ClearMainDrawCanvas(cm.ClearSelectedObject());
+            }
+            // If the Ctrl + C keys are being pressed, start the copySelectedObject timer.
+            else if (e.Control && e.KeyCode == Keys.C && cm.SelectedObject != null)
+            {
+                IntervalManager.Singleton.ManageTimer("copySelectedObject", true);
+            }
         }
 
 
@@ -298,38 +592,16 @@ namespace PCB_Drawing_Tool
         }
 
 
-        private void Form1_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Control && e.KeyCode == Keys.Z)
-            {
-                ClearMainDrawCanvas(CanvasManager.Singleton.RemoveLastObjectFromCanvas());
-            }
-        }
-
-
         private void btnUndo_Click(object sender, EventArgs e)
         {
-            ClearMainDrawCanvas(CanvasManager.Singleton.RemoveLastObjectFromCanvas());
-            UpdateUndoButtonStatus();
-        }
-
-
-        private void UpdateUndoButtonStatus()
-        {
-            if (CanvasManager.Singleton.GetCountOfCanvasObjects() > 0)
-            {
-                btnUndo.Enabled = true;
-            }
-            else
-            {
-                btnUndo.Enabled = false;
-            }
+            ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
+            UpdateButtonStatus("undo");
         }
 
 
         private void saveToolStripMenuItem1_Click(object sender, EventArgs e)
         {
-            FileManager.Singleton.SaveToFile(sender, e);
+            fm.SaveToFile(sender, e);
         }
 
 
@@ -349,10 +621,16 @@ namespace PCB_Drawing_Tool
 
             if (folderBrowser.ShowDialog() == DialogResult.OK)
             {
-                FileManager.Singleton.SaveDefaultConfig(Path.GetDirectoryName(folderBrowser.FileName) + "\\");
+                fm.SaveDefaultConfig(Path.GetDirectoryName(folderBrowser.FileName) + "\\");
             }
 
             SetDefaultFilepathValue();
+        }
+
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ClearMainDrawCanvas(cm.ClearSelectedObject());
         }
     }
 }

@@ -3,6 +3,7 @@ using System;
 using System.Linq;
 using System.Windows.Forms;
 using System.Drawing.Drawing2D;
+using System.Collections.Generic;
 
 namespace PCB_Drawing_Tool
 {
@@ -11,22 +12,22 @@ namespace PCB_Drawing_Tool
         private int length;
         private int width;
         private int angle;
+        private int thickness;
 
 
-        public Line(int x1, int y1, int lineLength, int lineWidth, int lineAngle) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
+        public Line(int x, int y, int width, int length, int angle, int thickness) : base(x, y)
         {
-            length = lineLength;
-            width = lineWidth;
-            angle = lineAngle;
-
-            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
+            this.width = width;
+            this.length = length;
+            this.angle = angle;
+            this.thickness = thickness;
         }
 
 
-        public override string[] GetObjectParameters()
+        public override int[] GetObjectParameters()
         {
-            string[] baseParameters = base.GetObjectParameters();
-            string[] classParameters = new string[] { length.ToString(), width.ToString(), angle.ToString() };
+            int[] baseParameters = base.GetObjectParameters();
+            int[] classParameters = new int[] { width, length, angle, thickness };
             return baseParameters.Concat(classParameters).ToArray();
         }
 
@@ -42,12 +43,27 @@ namespace PCB_Drawing_Tool
             };
 
             GraphicsPath gp = new GraphicsPath();
-            gp.AddRectangle(new Rectangle(0, 0, length, width));
-            
-            Matrix matrix = new Matrix();
-            matrix.RotateAt(angle, new Point(length / 2, width / 2));
-            gp.Transform(matrix);
-            
+
+            // Check if the line whos to be drawn is straight or diagonal, and act accordingly.
+            if (angle != 0)
+            {
+                gp.AddPolygon(new Point[]
+                {
+                    new Point(0, thickness - 3),
+                    new Point(thickness - 3, 0),
+                    new Point(length - 3, length - thickness),
+                    new Point(length - thickness, length - 3)
+                });
+
+                Matrix matrix = new Matrix();
+                matrix.RotateAt(angle, new Point(length / 2, width / 2));
+                gp.Transform(matrix);
+            }
+            else
+            {
+                gp.AddRectangle(new Rectangle(0, 0, length, width));
+            }
+           
             Region rg = new Region(gp);
             graphicObject.Region = rg;
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace PCB_Drawing_Tool
 {
@@ -104,11 +105,11 @@ namespace PCB_Drawing_Tool
         /// <param name="e"></param>
         public void SaveToFile(object sender, EventArgs e)
         {
-            StreamWriter sw = filepath != "" ? new StreamWriter(filepath + FILENAME) : new StreamWriter(FILENAME);
+            StreamWriter sw = filepath != "" ? new StreamWriter(filepath + FILENAME, false) : new StreamWriter(FILENAME, false);
 
-            foreach(CanvasObject element in CanvasManager.Singleton.AllCanvasObjects)
+            foreach (var entry in CanvasManager.Singleton.AllCanvasObjects)
             {
-                sw.WriteLine(element.GetType().Name + " " + string.Join(" ", element.GetObjectParameters()));
+                sw.WriteLine(entry.Key.GetType().Name + " " + string.Join(" ", entry.Key.GetObjectParameters()));
             }
             sw.Close();
         }
@@ -128,19 +129,7 @@ namespace PCB_Drawing_Tool
                 string objectType = rawData[0];
                 int[] data = Array.ConvertAll(rawData.Skip(1).ToArray(), int.Parse);
 
-                switch(objectType)
-                {
-                    case "Line":
-                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4]);
-                        break;
-                    case "Circle":
-                        MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3]);
-                        break;
-                    case "Transistor":
-                        //MainProgram.MainForm.DrawObject(data[0], data[1], data[2], data[3], data[4], data[5]);
-                        break;
-                }
-
+                MainProgram.MainForm.DrawObject(objectType, data, true);
             }
             sr.Close();
         }

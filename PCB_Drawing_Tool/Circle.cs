@@ -12,19 +12,17 @@ namespace PCB_Drawing_Tool
         private int borderWidth;
 
 
-        public Circle(int x1, int y1, int diameter, int borderWidth) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
+        public Circle(int x, int y, int diameter, int borderWidth) : base(x, y)
         {
             this.diameter = diameter;
             this.borderWidth = borderWidth;
-
-            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
         }
 
 
-        public override string[] GetObjectParameters()
+        public override int[] GetObjectParameters()
         {
-            string[] baseParameters = base.GetObjectParameters();
-            string[] classParameters = new string[] { diameter.ToString(), borderWidth.ToString() };
+            int[] baseParameters = base.GetObjectParameters();
+            int[] classParameters = new int[] { diameter, borderWidth };
             return baseParameters.Concat(classParameters).ToArray();
         }
 

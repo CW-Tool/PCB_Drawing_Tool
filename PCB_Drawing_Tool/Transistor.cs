@@ -13,21 +13,19 @@ namespace PCB_Drawing_Tool
         private int angle;
 
 
-        public Transistor(int x1, int y1, int length, int height, int borderWidth, int angle) : base(x1, y1, CanvasManager.Singleton.GetCountOfCanvasObjects() + 1)
+        public Transistor(int x, int y, int length, int height, int borderWidth, int angle) : base(x, y)
         {
             this.length = length;
             this.height = height;
             this.borderWidth = borderWidth;
             this.angle = angle;
-
-            CanvasManager.Singleton.AddObject(this, CreateCanvasObject());
         }
 
 
-        public override string[] GetObjectParameters()
+        public override int[] GetObjectParameters()
         {
-            string[] baseParameters = base.GetObjectParameters();
-            string[] classParameters = new string[] { length.ToString(), height.ToString(), borderWidth.ToString(), angle.ToString() };
+            int[] baseParameters = base.GetObjectParameters();
+            int[] classParameters = new int[] { length, height, borderWidth, angle };
             return baseParameters.Concat(classParameters).ToArray();
         }
 
