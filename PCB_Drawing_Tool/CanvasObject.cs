@@ -5,15 +5,20 @@ namespace PCB_Drawing_Tool
 {
     abstract class CanvasObject
     {
-        protected Point coordiantes;
+        protected Point coordinates;
         protected Color backgroundColor;
 
         public CanvasObject (int x1, int y1)
         {
-            coordiantes = new Point(x1, y1);
+            coordinates = new Point(x1, y1);
             backgroundColor = Color.Black;
         }
 
+        public Point Coordinates
+        {
+            get { return coordinates; }
+            set { coordinates = value; }
+        }
 
         /// <summary>
         /// Creates a PictureBox with the desired shape based on which class it belongs to. 
@@ -28,7 +33,7 @@ namespace PCB_Drawing_Tool
         /// <returns>An array of string values.</returns>
         public virtual int[] GetObjectParameters()
         {
-            return new int[] { coordiantes.X, coordiantes.Y };
+            return new int[] { coordinates.X, coordinates.Y };
         }
 
 

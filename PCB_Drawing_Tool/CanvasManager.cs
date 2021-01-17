@@ -70,6 +70,29 @@ namespace PCB_Drawing_Tool
 
 
 		/// <summary>
+		/// Removes an entry from the allCanvasObjects collection. 
+		/// </summary>
+		/// <param name="value">The PictureBox which is the value of a stored dictionary entry.</param>
+		public void RemoveObject(PictureBox value)
+		{
+			CanvasObject dictKey = null;
+
+			foreach (var entry in allCanvasObjects)
+			{
+				if (entry.Value == value)
+				{
+					dictKey = entry.Key;
+				}
+			}
+
+			if (dictKey != null)
+			{
+				allCanvasObjects.Remove(dictKey);
+			}
+		}
+
+
+		/// <summary>
 		/// Gets the reference to a stored CanvasObject from allCanvasObjects.
 		/// </summary>
 		/// <param name="entryValue">The PictureBox whos the value of the desired CanvasObject.</param>
@@ -89,7 +112,7 @@ namespace PCB_Drawing_Tool
 
 
 		/// <summary>
-		/// Removes the last CanvasObject be removing it from both the allCanvasObjects and allCanvasGraphics collection.
+		/// Removes the last CanvasObject from the allCanvasObjects collection.
 		/// </summary>
 		/// <returns>The corresponding PictureBox which is physically represented on the main Canvas in the Form.</returns>
 		public PictureBox RemoveLastObjectFromCanvas()
@@ -111,8 +134,6 @@ namespace PCB_Drawing_Tool
 		/// <summary>
 		/// If the right mouse button is being pressed onto a PictureBox, make it the selected object.
 		/// </summary>
-		/// <param name="sender"></param>
-		/// <param name="e"></param>
 		public void SelectObject(object sender, MouseEventArgs e)
 		{
 			if (e.Button == MouseButtons.Right)

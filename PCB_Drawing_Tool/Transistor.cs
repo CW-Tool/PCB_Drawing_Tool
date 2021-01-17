@@ -34,7 +34,7 @@ namespace PCB_Drawing_Tool
         {
             PictureBox graphicObject = new PictureBox
             {
-                Location = coordiantes,
+                Location = coordinates,
                 BackColor = backgroundColor,
                 Width = length,
                 Height = height

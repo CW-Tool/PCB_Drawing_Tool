@@ -42,8 +42,6 @@ namespace PCB_Drawing_Tool
         /// <summary>
         /// Adjusts the size and location of the layout components which make up the GUI, to fit the size of the current Form. 
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void ResizeCompontensToForm(object sender, EventArgs e)
         {
             Control window = sender as Control;
@@ -69,8 +67,6 @@ namespace PCB_Drawing_Tool
         /// <summary>
         /// Checks if autosave is to be active, and enables it if so. 
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         private void SetAutosaveStatus(object sender, EventArgs e)
         {
             string autosaveStatus = fm.ReadConfigFile()[1];
@@ -287,8 +283,6 @@ namespace PCB_Drawing_Tool
         /// <summary>
         /// Makes a copy of the selected CanvasObject, and creates a preview of the new object at the cursor location.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void CopySelectedObject(object sender, EventArgs e)
         {
             CanvasObject selectedObject = cm.GetCanvasObject(cm.SelectedObject);
@@ -303,13 +297,40 @@ namespace PCB_Drawing_Tool
 
 
         /// <summary>
-        /// Moves the currently selected CanvasObject by changing its location to that of the cursor. 
+        /// Moves the currently selected CanvasObject by permanently changing its location to that of the cursor. 
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void MoveSelectedObject(object sender, EventArgs e)
         {
-            cm.SelectedObject.Location = GetCursorPosition();
+            Point cursorCoords = GetCursorPosition();
+
+            foreach (var entry in cm.AllCanvasObjects)
+            {
+                if (entry.Value == cm.SelectedObject)
+                {
+                    entry.Key.Coordinates = cursorCoords;
+                    entry.Value.Location = cursorCoords;
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Moves all of the CanvasObjects relative to the cursor location, and stores their new location permanently.  
+        /// </summary>
+        public void MoveAllObjects(object sender, EventArgs e)
+        {
+            Point cursorCoords = GetCursorPosition();
+
+            foreach(var entry in cm.AllCanvasObjects)
+            {
+                Point storedCoords = entry.Key.Coordinates;
+                Point newCoords = new Point(storedCoords.X - (startLocation.X - cursorCoords.X), storedCoords.Y - (startLocation.Y - cursorCoords.Y));
+
+                entry.Key.Coordinates = newCoords;
+                entry.Value.Location = newCoords;
+            }
+
+            startLocation = cursorCoords;
         }
 
 
@@ -317,8 +338,6 @@ namespace PCB_Drawing_Tool
         /// Creates a preview object which shows where- and how the new object will look like. 
         /// Gets its parameters for drawing the new object directly from the Form components.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
         public void CreatePreviewObject(object sender, EventArgs e)
         {
             string objectType = cboObjectType.Text;
@@ -504,6 +523,11 @@ namespace PCB_Drawing_Tool
                     CanvasObject objectToDraw = cm.PreviewObject.First().Key;
                     DrawObject(objectToDraw.GetType().Name, objectToDraw.GetObjectParameters(), true);
                 }
+                // If the left mouse button is pressed while the moveAllObjects timer is active, stop the timer.
+                else if (IntervalManager.Singleton.GetTimerStatus("moveAllObjects"))
+                {
+                    IntervalManager.Singleton.ManageTimer("moveAllObjects", false);
+                }
                 // If the left mouse button is pressed and there is no CanvasObject selected, start the drawPreviewObject timer.
                 else if (cm.SelectedObject == null)
                 {
@@ -562,15 +586,15 @@ namespace PCB_Drawing_Tool
 
         private void KeyDownEvent(object sender, KeyEventArgs e)
         {
-            // If the Ctrl + Z keys are being pressed, trigger the "undo" function.
-            if (e.Control && e.KeyCode == Keys.Z)
+            // If the Ctrl + Z keys are being pressed while the undo-button is enabled, trigger the "undo" function.
+            if ((e.Control && e.KeyCode == Keys.Z) && btnUndo.Enabled)
             {
-                ClearMainDrawCanvas(cm.RemoveLastObjectFromCanvas());
+                btnUndo_Click(sender, e);
             }
-            // If the del key is being pressed while a CanvasObject is selected, remove that object.
-            else if (e.KeyCode == Keys.Delete && cm.SelectedObject != null)
+            // If the del key is being pressed while the delete-button is enabled, remove that object.
+            else if (e.KeyCode == Keys.Delete && btnDelete.Enabled)
             {
-                ClearMainDrawCanvas(cm.ClearSelectedObject());
+                btnDelete_Click(sender, e);
             }
             // If the Ctrl + C keys are being pressed, start the copySelectedObject timer.
             else if (e.Control && e.KeyCode == Keys.C && cm.SelectedObject != null)
@@ -627,10 +651,18 @@ namespace PCB_Drawing_Tool
             SetDefaultFilepathValue();
         }
 
-
-        private void button1_Click(object sender, EventArgs e)
+        private void btnDelete_Click(object sender, EventArgs e)
         {
-            ClearMainDrawCanvas(cm.ClearSelectedObject());
+            PictureBox pb = cm.ClearSelectedObject();
+            cm.RemoveObject(pb);
+            ClearMainDrawCanvas(pb);
+        }
+
+        private void btnMoveObjects_Click(object sender, EventArgs e)
+        {
+            startLocation = new Point(Screen.FromControl(this).Bounds.Width / 2 - 100, Screen.FromControl(this).Bounds.Height / 2);
+            Cursor.Position = startLocation;
+            IntervalManager.Singleton.ManageTimer("moveAllObjects", true);
         }
     }
 }

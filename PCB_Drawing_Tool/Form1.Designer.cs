@@ -90,16 +90,18 @@ namespace PCB_Drawing_Tool
             this.btnMoveObjects.TabIndex = 11;
             this.btnMoveObjects.Text = "Move All Objects";
             this.btnMoveObjects.UseVisualStyleBackColor = true;
+            this.btnMoveObjects.Click += new System.EventHandler(this.btnMoveObjects_Click);
             // 
             // btnDelete
             // 
+            this.btnDelete.Enabled = false;
             this.btnDelete.Location = new System.Drawing.Point(13, 156);
             this.btnDelete.Name = "btnDelete";
             this.btnDelete.Size = new System.Drawing.Size(150, 29);
             this.btnDelete.TabIndex = 10;
             this.btnDelete.Text = "Delete";
             this.btnDelete.UseVisualStyleBackColor = true;
-            this.btnDelete.Click += new System.EventHandler(this.button1_Click);
+            this.btnDelete.Click += new System.EventHandler(this.btnDelete_Click);
             // 
             // picSidebar
             // 

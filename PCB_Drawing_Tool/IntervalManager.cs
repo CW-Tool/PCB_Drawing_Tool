@@ -28,6 +28,11 @@ namespace PCB_Drawing_Tool
             moveSelectedObject.Tick += MainProgram.MainForm.MoveSelectedObject;
             allTimers["moveSelectedObject"] = moveSelectedObject;
 
+            Timer moveAllObjects = new Timer();
+            moveAllObjects.Interval = 1;
+            moveAllObjects.Tick += MainProgram.MainForm.MoveAllObjects;
+            allTimers["moveAllObjects"] = moveAllObjects;
+
             Timer autosaveCanvas = new Timer();
             autosaveCanvas.Interval = 10000;
             autosaveCanvas.Tick += FileManager.Singleton.SaveToFile;
