@@ -335,6 +335,22 @@ namespace PCB_Drawing_Tool
 
 
         /// <summary>
+        /// Captures the currently visible drawing canvas and stores the image as a PNG-file.
+        /// </summary>
+        private void ExportCanvas()
+        {
+            int width = mainContainer.Width - 16;
+            int height = mainContainer.Height - 16;
+
+            Bitmap bitmap = new Bitmap(width, height);
+            Graphics g = Graphics.FromImage(bitmap);
+            g.CopyFromScreen(new Point(Bounds.Left + 12, Bounds.Top + 55), Point.Empty, new Size(width, height));
+
+            bitmap.Save(fm.ReadConfigFile()[0] + "PCB_Drawing.png", ImageFormat.Png);
+        }
+
+
+        /// <summary>
         /// Creates a preview object which shows where- and how the new object will look like. 
         /// Gets its parameters for drawing the new object directly from the Form components.
         /// </summary>
@@ -651,6 +667,7 @@ namespace PCB_Drawing_Tool
             SetDefaultFilepathValue();
         }
 
+
         private void btnDelete_Click(object sender, EventArgs e)
         {
             PictureBox pb = cm.ClearSelectedObject();
@@ -658,11 +675,18 @@ namespace PCB_Drawing_Tool
             ClearMainDrawCanvas(pb);
         }
 
+
         private void btnMoveObjects_Click(object sender, EventArgs e)
         {
             startLocation = new Point(Screen.FromControl(this).Bounds.Width / 2 - 100, Screen.FromControl(this).Bounds.Height / 2);
             Cursor.Position = startLocation;
             IntervalManager.Singleton.ManageTimer("moveAllObjects", true);
+        }
+
+
+        private void mItemExport_Click(object sender, EventArgs e)
+        {
+            ExportCanvas();
         }
     }
 }
