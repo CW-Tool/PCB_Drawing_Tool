@@ -52,7 +52,7 @@ namespace PCB_Drawing_Tool
             this.hToolStripMenuItem = new System.Windows.Forms.ToolStripSeparator();
             this.mItemSave = new System.Windows.Forms.ToolStripMenuItem();
             this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.convertToPNGToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mItemExport = new System.Windows.Forms.ToolStripMenuItem();
             this.headerMenu = new System.Windows.Forms.MenuStrip();
             this.mainContainer = new System.Windows.Forms.Panel();
             this.mainDrawingCanvas = new System.Windows.Forms.PictureBox();
@@ -270,16 +270,17 @@ namespace PCB_Drawing_Tool
             // 
             this.exportToolStripMenuItem.BackColor = System.Drawing.Color.White;
             this.exportToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.convertToPNGToolStripMenuItem});
+            this.mItemExport});
             this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
             this.exportToolStripMenuItem.Size = new System.Drawing.Size(53, 23);
             this.exportToolStripMenuItem.Text = "Export";
             // 
-            // convertToPNGToolStripMenuItem
+            // mItemExport
             // 
-            this.convertToPNGToolStripMenuItem.Name = "convertToPNGToolStripMenuItem";
-            this.convertToPNGToolStripMenuItem.Size = new System.Drawing.Size(157, 22);
-            this.convertToPNGToolStripMenuItem.Text = "Convert to PNG";
+            this.mItemExport.Name = "mItemExport";
+            this.mItemExport.Size = new System.Drawing.Size(180, 22);
+            this.mItemExport.Text = "Convert to PNG";
+            this.mItemExport.Click += new System.EventHandler(this.mItemExport_Click);
             // 
             // headerMenu
             // 
@@ -367,7 +368,7 @@ namespace PCB_Drawing_Tool
         private System.Windows.Forms.ToolStripSeparator hToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem mItemSave;
         private System.Windows.Forms.ToolStripMenuItem exportToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem convertToPNGToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mItemExport;
         private System.Windows.Forms.MenuStrip headerMenu;
         private System.Windows.Forms.Panel mainContainer;
         private System.Windows.Forms.PictureBox mainDrawingCanvas;

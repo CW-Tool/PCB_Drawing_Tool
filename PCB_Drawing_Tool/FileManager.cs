@@ -2,7 +2,6 @@
 using System.IO;
 using System.Linq;
 using System.Collections.Generic;
-using System.Windows.Forms;
 
 namespace PCB_Drawing_Tool
 {
